@@ -5,6 +5,10 @@ https://github.com/me115/linuxtools_rst/tree/master/
 
 进阶篇：
 https://github.com/me115/linuxtools_rst/tree/master/advance
+01_program_build 程序构建
+02_program_debug 程序调试
+03_optimization 性能优化
+
 
 01_program_build 程序构建
   目录
