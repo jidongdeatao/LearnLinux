@@ -28,6 +28,7 @@ https://github.com/me115/linuxtools_rst/blob/master/base/02_file_manage.rst
     总结
     
 03_text_processing 文本处理
+https://github.com/me115/linuxtools_rst/blob/master/base/03_text_processing.rst
    目录
       find 文件查找
          定制搜索
