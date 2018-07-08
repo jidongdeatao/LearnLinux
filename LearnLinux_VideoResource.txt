@@ -49,3 +49,25 @@
                            网络环境查看命令、网络测试命令
                         第四章：远程登录工具
                            SSH协议原理、Linux远程登录工具SecureCRT、XShell和WinSCP工具
+          【课程：Linux中的计划任务之Crontab】https://www.imooc.com/learn/216
+                        第二章：Crontab简介
+                        第三章：Crontab实践
+                             Crontab的基本组成 配置文件格式  Crontab工具的使用 配置文件 日志
+                        第四章：Crontab的常见错误
+                                  4-1 Crontab的常见错误之环境变量 
+                                  4-2 Crontab的常见错误之命令行操作 
+                                  4-3 Crontab的常见错误之分钟设置误用 
+                                  4-4 Crontab综合案例解析 
+          【课程：Linux 智能DNS】https://www.imooc.com/learn/768
+                       第一章：智能DNS初识
+                              智能DNS作用/存在的缺陷/实现的原理
+                       第二章：智能DNS实现
+                              智能DNS的IP库 通过APINC获取IP库
+                              Bind的ACL  如何通过主机数量求的掩码地址
+                              Shell获取智能DNS的IP库
+                       第三章：智能DNS配置
+                              智能DNS配置与搭建测试
+                       第四章：DNS安全
+                              DNS污染 DNS拒绝服务攻击 DNS放大攻击
+                              
+          
