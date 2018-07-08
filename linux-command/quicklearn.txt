@@ -1,0 +1,278 @@
+linux网络设置：1）图形界面设置--点击网络，选择system eth0，激活网络。ifconfig查看IP
+                         2）命令方式：ifup eth0激活网络。     ifdown eth0断开网络。
+
+虚拟机网络的设置：虚拟机-设置-网络适配器
+        1）桥接模式，虚拟机有独立IP地址，可以直接访问外网（上课使用）172.31.84.114
+        2）NAT模式，与本机共享IP地址，可以通过访问本机再间接访问外网
+        3）主机模式，与本机形成内网，不能访问外网
+虚拟机
+设置快照：虚拟机--快照--设置快照--填写名称--点击“拍摄快照”
+还原快照：虚拟机--快照--快照管理器--选择一个完好的快照--点击“转到”
+xshell 远程终端连接 
+用处：企业用于连接服务器上的Linux的终端，方便企业人员远程操作linux。
+文件-新建-
+xftp 远程文件传输
+用处：企业用于本机上传文件到服务器，从服务器下载文件到本机
+文件系统
+/根目录
+/root管理员的家
+/home普通用户的家
+/bin 命令
+/sbin 超级管理员使用的命令
+/boot引导文件夹
+/dev设备目录
+/etc配置文件夹
+/lib函数库
+/media多媒体文件夹
+/mnt共享文件夹
+/var发布网页的文件夹
+/tmp临时文件夹（权限足够大）
+
+linux命令结构
+命令  【选项】 【参数】
+
+cd(change directory)切换目录。
+cd空格/  回到根目录
+cd空格~（回到家目录，如果是Root用户登录下回到/root文件夹，如果是普通用户，回到/home文件夹）
+cd回车（同上，回到家目录）
+cd空格..回到上一级目录
+绝对路径：完整路径，从/根目录开始。
+ ：相对于当前路径的不完整路径，可以省略前面的当前路径。
+当前路径+相对路径=绝对路径（完整路径）
+pwd(print working directory)显示工作目录。
+ls列出目录内容。
+mkdir建立目录(创建文件夹)
+cd /tmp    进入/tmp建立目录（因为/tmp权限大）
+mkdir  a b c d并列建了abcd 4个空文件夹
+mkdir  -p a/b/c/d层级建了abcd 4个空文件夹
+（  -p     建立目录时建立其所有不存在的父目录）
+rmdir(remove directory)删除目录（并且是空目录）
+rmdir a b c d并列删除abcd 4个空文件夹
+rmdir -p a/b/c/d层级删除abcd 4个空文件夹
+rm(remove)删除文件或目录。
+rm -rf a删除整个a文件夹包括下面的子文件或者子文件夹
+-f或--force 　强制删除文件或目录。 
+-r或-R或--recursive 　递归处理，将指定目录下的所有文件及子目录一并处理。
+rm a/b/c/d/yum.log删除yum.log文件
+cp(copy)复制文件或目录
+cp yum.log a/b/c/d拷贝文件
+cp -r a /home拷贝整个a文件夹以及文件夹下的子文件到/home，带上-r
+(-r递归处理，将指定目录下的文件与子目录一并处理。)
+cp /tmp/yum.log /tmp/a/b/c 注意绝对路径和相对路径 
+mv(move)剪切文件或目录
+mv /tmp/a/b/c/yum.log /tmp/a 剪切文件
+mv /tmp/a /home 剪切文件夹
+touch新建一个空文件
+touch file.txt新建一个file.txt的空文件
+vi编辑器
+vi 已存在文件，打开这个已存在文件  vi file.txt
+vi 不存在的文件，新建一个文件并打开
+vi file.txt进入vi编辑器模式，即打开了file.txt文件
+按下字母i，进入编辑模式，vi编辑器左下角是--INSERT--
+输入我们需要写的内容
+按下ESC退出编辑模式，vi编辑器左下角INSERT消失
+输入：wq  w保存， q离开。   ：q!不保存离开
+按下回车，退出vi编辑器
+复制粘贴/删除
+非编辑状态，按下数字Nyy复制光标所在的N行，按下字母p，粘贴在光标处
+大写H光标切换到首行，M中间，L最低行 
+查找
+非编辑状态，从上往下查找，:/hello按下回车，按下字母n, 从上往下查找hello
+非编辑状态，从下往上查找，:?hello按下回车，按下字母n, 从下往上查找hello
+替换
+非编辑状态，:1,$s/world/51testing/g，从第一行到末行，将world替换成51testing
+cat输出文档内容
+cat file.txt
+more往下翻页显示文档内容
+more file.txt
+more /etc/httpd/conf/httpd.conf
+按ENTER增加显示一行
+ctrl+z终止命令，回到命令行
+less分页显示文档内容
+less /etc/httpd/conf/httpd.conf
+往下翻页按PageDown，往上翻页按PageUp
+head显示文档头几行内容
+head /etc/httpd/conf/httpd.conf（不带数字默认显示头10行）
+head -n /etc/httpd/conf/httpd.conf（带数字显示头n行,n为任意数字）
+tail显示文档末几行内容
+tail /etc/httpd/conf/httpd.conf（不带数字默认显示末10行）
+tail -n /etc/httpd/conf/httpd.conf（带数字显示末n行,n为任意数字）
+用户和用户组user  and group
+user  
+tail /etc/passwd(user的配置文件)
+/home目录下新增一个用户的文件夹
+user1:x:501(用户编号uid)
+group
+tail /etc/group
+group1:x:501(用户组编号gid)
+id显示用户信息
+id user1
+useradd建立用户帐号
+useradd user1(新建一个用户user1，同时默认创建一个组user1，组跟用户名同名)
+-g<群组> 　指定用户所属的群组。 
+useradd -g group1 user2
+groupadd创建一个用户组
+groupadd group1
+passwd设置密码
+passwd user1
+su(super user)变更用户身份，切换用户
+su user2
+groups显示当前用户所在的组
+usermod修改用户帐号
+-g<群组> 　修改用户所属的群组。 
+usermod -g group1 user1（group1是组名，user1是用户名）
+userdel删除用户帐号
+userdel user3（删除用户）
+删除/home下面的文件夹user3(一定不要忘记)    rm -rf user3
+groupdel删除群组
+groupdel group(group下面没有用户才能成功删除)
+程序（静态，硬盘）--进程（动态，内存）
+ps(process status)报告程序状况
+ps -ef查看所有进程
+ps -ef|grep user1 查看关于user1的进程
+(管道前是输出，管道后是输入，前面的命令的输出作为后面命令的输入)
+grep查找文件里符合条件的字符串
+kill删除执行中的程序或工作。
+kill -9 pid（进程标识符）
+kill -9 pid1 pid2 pid3（同时杀死进程）
+service httpd start启动apache(浏览器输入localhost)
+service httpd stop停止apache
+service httpd restart重启apache
+service httpd status查看服务状态
+service mysqld start启动数据库mysql
+service mysqld status查看数据库状态
+mysql -u root -p 连接数据库(mysql用户名root，密码是空)
+ctrl+z退出到命令行
+service mysqld stop
+service mysqld restart
+ll显示详细信息，等于ls -l
+test.sh
+.sh后缀的文件，可执行文件，类似.exe。文件里的内容是命令ls，当执行.sh等于执行文件里的命令。
+./test.sh执行这个文件，./代表当前路径
+-rw-r--r--. 1 user1 group1    0  7月 14 14:38 test.sh
+第一个-代表文件，d代表文件夹
+r=可读=4
+w=可写=2
+x=可执行=1
+-=无权限=0
+第一组，创建者user1,管理员root的权限，rw-。可读可写不可执行。  
+第二组，同组用户
+第三组，不同组用户 
+chmod(change mode)变更文件或目录的权限，创建者或管理员使用的命令
+chmod 744 test.sh
+-rwxr--r--. 1 user1 group1    3  7月 14 14:41 test.sh
+chmod -R 777 dir
+-R或--recursive 　递归处理，将指定目录下的所有文件及子目录一并处理
+gzip压缩文件，变成.gz后缀的文件
+gzip test.sh压缩后变成test.sh.gz    
+gzip -d test.sh.gz
+-d或--decompress或----uncompress 　解开压缩文件。
+zip压缩文件，.zip后缀
+zip test.sh.zip test.sh（zip后面跟新建的压缩文件名）
+unzip解压缩zip文件
+unzip test.sh.zip
+tar备份文件（或文件夹）
+-c或--create   建立新的备份文件。
+-v或--verbose   显示指令执行过程。
+-f<备份文件>或--file=<备份文件>   指定备份文件。
+tar -cvf test.sh.tar test.sh
+tar -cvf bak.tar dir file2.txt file.txt test.sh（同时备份多个文件或者文件夹）
+-x或--extract或--get  从备份文件中还原文件。
+tar -xvf bak.tar解包备份文件
+-z或--gzip或--ungzip   通过gzip指令处理备份文件。
+tar -zcvf bak.tar.gz dir file2.txt file.txt test.sh（既打包又压缩，c打包，z压缩）
+tar -zxvf bak.tar.gz(既解包又解压，x解包，z解压)
+第二种方法解压解包
+gzip -d bak.tar.gz 
+tar -xvf bak.tar
+
+du -sm查看文件夹总的大小（M）
+du -sh查看文件夹总的大小（K）
+du -h查看文件夹下每个文件夹的大小
+df 查看磁盘空间
+vmstat 监控当前系统的状态
+id空闲的cpu
+free剩余的内存
+swap上下文切换
+io输入输出
+top动态的监控进程所占系统的资源
+主要看哪个进程占用CPU,内存比较多
+
+netstat查看网络状态
+netstat -an查看正在被使用的端口号
+reboot重新开机
+shutdown系统关机指令
+shutdown -r now（立即重启）
+shutdown -r 10(10分钟后自动重启，root用户使用)
+shutdown -r 20:35(20:35重启)
+shutdown -h now（立即关机）
+shutdown -h 10
+shutdown -h 20:35(20:35关机)
+shutdown -h 20:35
+halt立即关机
+poweroff立即关机
+
+
+linux应用一：安装VMTool
+1）虚拟机--安装VMtool(CD/DVD,C:\Program Files\VMware\VMware Workstation\linux.iso)
+2）进入linux操作系统，打开/media，里面放了VMtool安装包
+Step:
+cd /media
+cd VMware\ Tools
+cp VMwareTools-9.6.2-1688356.tar.gz /tmp
+cd /tmp
+chmod 777 VMwareTools-9.6.2-1688356.tar.gz 
+tar -zxvf VMwareTools-9.6.2-1688356.tar.gz 
+chmod -R 777 vmware-tools-distrib
+cd vmware-tools-distrib
+./vmware-install.pl
+一路回车，安装过程有点慢
+reboot
+1.实现文件共享，跟本机共享
+虚拟机-设置，选项-共享文件夹，勾选“在下次关机或挂起前一直启用”
+添加-主机路径，选择任意一个本机的文件夹，确定
+/mnt/hgfs里面就是共享的本机文件夹内容
+2.实现跟本机的复制，粘贴
+
+
+linux应用二：发布网页（静态网页.html，动态网页ranzhi）
+静态网页.html
+Step:
+用FTP上传文件到服务器
+FTP连上后，连接服务器上的文件夹改为/tmp
+将左边的文件（本机）拖到右边的/tmp目录下（服务器）
+cd /tmp
+service httpd start
+打开linux里面的浏览器，网址输入http://localhost/
+cp web.html /var/www/html
+cd /var/www/html
+chmod 777 web.html
+打开发布的网页,将localhost换成本机的IP地址
+http://localhost/web.html
+http://172.31.84.114/web.html
+关机防火墙（可以让其他用户访问这台电脑），系统-管理-防火墙，点击“禁用”再点“应用”，点击“是”
+动态网页ranzhi
+Step:
+通过FTP将ranzhi网页上传到服务器的/tmp目录下
+cd /tmp
+chmod 777 ranzhi.3.3.zip
+unzip ranzhi.3.3.zip
+cp -r ranzhi /var/www/html
+cd /var/www/html
+chmod -R 777 ranzhi
+浏览器打开http://172.31.84.114/ranzhi/www/
+需要安装PHP应用服务器
+yum install(上网下载并安装) 
+yum remove(卸载)
+yum install php php-cli php-pdo php-mysql
+如果出现yum locked的解决办法
+ps -ef|grep yum
+kill -9 
+service httpd restart
+重新打开http://172.31.84.114/ranzhi/www/
+service mysqld start
+http://172.31.84.114/ranzhi/www/
+环境搭建与网页的发布
+1.linux安装（WEB服务器apache，数据库服务器mysql，应用服务器php）
+2.启动服务apache, mysql
+3.发布网页，通过FTP将网页上传到服务器上/tmp,再发布到的服务器的一个文件夹
