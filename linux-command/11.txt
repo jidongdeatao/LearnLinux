@@ -1,0 +1,628 @@
+二十二. 交互式使用Bash Shell:
+
+    1.  用set命令设置bash的选项:
+    下面为set主要选项的列表及其表述：
+选项名
+开关缩写
+描述
+allexport
+-a
+打开此开关，所有变量都自动输出给子Shell。
+noclobber
+-C
+防止重定向时文件被覆盖。
+noglob
+-d
+在路径和文件名中，关闭通配符。
+
+    #打开该选项
+    /> set -o allexport   #等同于set -a
+    #关闭该选项
+    /> set +o allexport  #等同于set +a
+    #列出当前所有选项的当前值。
+    /> set -o
+    allexport         off
+    braceexpand   on
+    emacs             on
+    errexit            off
+    errtrace          off
+    functrace        off
+    hashall            on
+    histexpand      on
+    ... ...
+    /> set -o noclobber     #打开noclobber选项，防止在重定向时原有文件被覆盖。
+    /> date > outfile         #通过date命令先生成一个文件outfile。
+    /> ls > outfile             #将ls命令的输出重定向到该文件outfile，shell将提示不能覆盖已经存在的文件。
+    -bash: outfile: cannot overwrite existing file
+    /> set +o noclobber    #关闭noclobber选项。
+    /> ls > outfile             #重新将ls的输出重定向到outfile，成功。
+
+    2.  变量:
+    设置局部变量:
+    /> name="stephen liu"  #注意等号两边不要有空格，如果变量值之间存在空格，则需要用双引号括起
+    /> echo $name
+    stephen liu
+    /> name=                    #将变量设置为空时，等号后面也不要有空格，直接回车即可。
+    /> echo $name             #name变量为空，因此echo不会有任何输出。
+    注意：以上变量的声明方式均可替换为declare variable=value的形式。
+
+    /> declare name="stephen liu"
+    /> readonly name         #将name变量设置为只读。
+    /> echo $name
+    stephen liu
+    /> name="my wife"      #如果针对只读变量重新赋值，将报错，提示name是只读变量。
+    -bash: name: readonly variable
+    /> unset name             #如果unset只读变量，将同样报错，提示不能unset只读变量。
+    -bash: unset: name: cannot unset: readonly variable
+
+    设置全局/环境变量:
+    在当前Shell中创建的全局/环境变量可以直接传递给它所有的子Shell，当前创建环境变量的Shell被称为夫Shell。
+    /> export allname=john         #利用export命令，将其后声明的变量置为环境变量
+    /> bash                                #启动一个新的子Shell
+    /> echo $allname                  #在子Shell中echo变量$allname，发现夫Shell中设置的值被传递到子Shell
+    john
+    /> declare -x allname2=peter #这里的功能和结果都是和上面的命令相同，只是利用declare -x命令设置环境变量
+    /> bash
+    /> echo $allname2
+    peter
+
+    下面的列表将给出常用的内置Shell环境变量:
+变量名
+含义
+BASH
+表示bash命令的完整路径名。
+ENV
+在启动新bash shell时执行的环境文件名。
+HOME
+主目录。
+LANG
+本地化语言。
+PATH
+命令搜索路径，彼此之间冒号分隔。
+PPID
+父进程PID。
+PWD
+当前工作目录，用cd命令设置。
+
+    3.  echo命令:
+    该命令主要用于将其参数打印到标准输出。其中-e选项使得echo命令可以无限制地使用转义序列控制输出的效果。下面的列表给出常用的转义序列。
+转义序列
+功能
+\c
+不换行打印
+\n
+换行
+\t
+制表符
+\\
+反斜杠
+    echo还提供了一个常用的-n选项，其功能不输出换行符。
+
+    /> echo The username is $LOGNAME
+    The username is stephen
+    #下面命令的输出中的“/>”表示命令行提示符。
+    /> echo -e "\tHello World\c"
+        Hello World />
+    /> echo -n "Hello World"
+    Hello World />
+
+    4.  printf命令:
+    该命令和C语言中的printf函数的功能相同，都用用来格式化输出的。格式包括字符串本身和描述打印效果的字符。定义格式的方法和C语言也是完全一样的，即在%后面跟一个说明符，如%f表示后面是一个浮点数，%d表示一个整数。printf命令也同样支持转义序列符，其常用转义序列如下：
+转义序列
+功能
+\c
+不换行打印
+\n
+换行
+\t
+制表符
+\\
+反斜杠
+\"
+双引号
+    其常用的格式化说明符列表如下：
+说明符
+描述
+%c
+ASCII字符
+%d,%i
+十进制整数
+%f
+浮点格式
+%o
+不带正负号的八进制值
+%s
+字符串
+%u
+不带正负号的十进制值
+%x
+不带正负号的十六进制值，其中使用a-f表示10-15
+%X
+不带正负号的十六进制值，其中使用A-F表示10-15
+%%
+表示%本身
+    下面是printf的一些常用使用方式：
+    /> printf "The number is %.2f.\n" 100   这里.2f表示保留小数点后两位
+    The number is 100.00.
+    #%-20s表示一个左对齐、宽度为20个字符字符串格式，不足20个字符，右侧补充相应数量的空格符。
+    #%-15s表示一个左对齐、宽度为15个字符字符串格式。
+    #%10.2f表示右对齐、10个字符长度的浮点数，其中一个是小数点，小数点后面保留两位。
+    /> printf "%-20s%-15s%10.2f\n" "Stephen" "Liu" 35
+    Stephen             Liu                 35.00
+    #%10s表示右对齐、宽度为10的字符串，如不足10个字符，左侧补充相应数量的空格符。
+    /> printf "|%10s|\n" hello
+    |     hello|
+    在printf中还有一些常用的标志符，如上面例子中的符号(-)，这里我们在介绍一个比较常用的标识符"#"
+    #如果#标志和%x/%X搭配使用，在输出十六进制数字时，前面会加0x/0X前缀。
+    /> printf "%x %#x\n" 15 15
+    f 0xf
+
+   5.  变量替换运算符:
+    bash中提供了一组可以同时检验和修改变量的特定修改符。这些修改符提供了一个快捷的方法来检验变量是不是被设置过，并把输出结果输出到一个变量中，见下表：
+修改符
+描述
+用途
+${variable:-word}
+如variable被设置且非空，则返回该值，否则返回word，变量值不变。
+如变量未定义，返回默认值。
+${variable-word}
+如variable未被设置，则返回word，变量值不变，如果设置变量，则返回变量值，即使变量的值为空值。
+如变量未设置，返回默认值。
+${variable:=word}
+如variable被设置且非空，则返回该值，否则设置变量为word，同时返回word。
+如果变量未定义，则设置其为默认值。
+${variable=word}
+如variable未设置，则设置变量为word，同时返回word，如果variable被设置且为空，将返回空值，同时variable不变。否则返回variable值，同时variable不变。
+如果变量未设置，则设置其为默认值。
+${variable:+word}
+如variable被设置且非空，则返回word，否则返回null，变量值不变。
+用于测试变量是否存在。
+${variable+word}
+如variable被设置(即使是空值)，则返回word，否则返回空。
+用于测试变量是否设置。
+${variable:?word}
+如variable被设置且非空，则返回该值，否则显示word，然后退出Shell。如果word为空，打印"parameter null or not set"
+为了捕捉由于变量未定义所导致的错误。
+${variable:offset}
+从variable的offset位置开始取，直到末尾。
+ 
+${variable:offset:length}
+从variable的offset位置开始取length个字符。
+ 
+
+    #${variable:-word}的示例，其C语言表示形式为：
+    #    if (NULL == variable)
+    #        return word;
+    #    else
+    #        return $variable;
+    /> unset var_name                        #将变量var_name置为空。
+    /> var_name=
+    /> echo ${var_name:-NewValue}    #var_name为空，因此返回NewValue
+    NewValue
+    /> echo $var_name                        #var_name的值未变化，仍然为空。
+
+    /> var_name=OldValue                   #给var_name赋值。
+    /> echo ${var_name:-NewValue}    #var_name非空，因此返回var_name的原有值。
+    OldValue
+    /> echo $var_name                        #var_name的值未变化，仍然OldValue。
+    OldValue
+
+    #${variable-word}的示例，其伪码表示形式为：
+    #    if (variable is NOT set)
+    #        return word;
+    #    else
+    #        return $variable;
+    /> unset var_name                         #取消该变量var_name的设置。
+    /> echo ${var_name-NewValue}    #var_name为空，因此返回NewValue
+    NewValue
+    /> echo $var_name                        #var_name的值未变化，仍然为空。
+
+    /> var_name=OldValue                   #给var_name赋值，即便执行var_name=，其结果也是一样。
+    /> echo ${var_name-NewValue}    #var_name非空，因此返回var_name的原有值。
+    OldValue
+    /> echo $var_name                        #var_name的值未变化，仍然OldValue。
+    OldValue
+    
+    #${variable:=word}的示例，其C语言表示形式为：
+    #    if (NULL == variable) {
+    #        variable=world;
+    #        return word;
+    #    } else {
+    #        return $variable;
+    #    }
+    /> unset var_name                        #将变量var_name置为空。
+    /> var_name=
+    /> echo ${var_name:=NewValue}   #var_name为空，设置变量为NewValue同时返回NewValue。
+    NewValue
+    /> echo $var_name                        #var_name的值已经被设置为NewValue。
+    NewValue
+    /> var_name=OldValue                  #给var_name赋值。
+    /> echo ${var_name:=NewValue}   #var_name非空，因此返回var_name的原有值。
+    OldValue
+    /> echo $var_name                       #var_name的值未变化，仍然OldValue。
+    OldValue
+    
+    #${variable=word}的示例，其伪码表示形式为：
+    #    if (variable is NOT set) {
+    #        variable=world;
+    #        return word;
+    #    } else if (variable == NULL) {
+    #        return $variable;  //variable is NULL
+    #    } else {
+    #        return $variable;
+    #    }
+    /> unset var_name                        #取消该变量var_name的设置。
+    /> echo ${var_name=NewValue}  #var_name未被设置，设置变量为NewValue同时返回NewValue。
+    NewValue
+    /> echo $var_name                        #var_name的值已经被设置为NewValue。
+    NewValue
+    /> var_name=                              #设置变量var_name，并给该变量赋空值。
+    /> echo ${var_name=NewValue}  #var_name被设置，且为空值，返回var_name的原有空值。
+    
+    /> echo $var_name                       #var_name的值未变化，仍未空值。
+    
+    /> var_name=OldValue                  #给var_name赋值。
+    /> echo ${var_name=NewValue}  #var_name非空，因此返回var_name的原有值。
+    OldValue
+    /> echo $var_name                       #var_name的值未变化，仍然OldValue。
+    OldValue
+    #${variable:+word}的示例，其C语言表示形式为：
+    #    if (NULL != variable)
+    #        return word;
+    #    else
+    #        return $variable;
+    /> var_name=OldValue                  #设置变量var_name，其值为非空。
+    /> echo ${var_name:+NewValue}   #由于var_name有值，因此返回NewValue
+    NewValue
+    /> echo $var_name                       #var_name的值仍然为远之OldValue
+    OldValue
+    /> unset var_name                        #将var_name置为空值。
+    /> var_name=
+    /> echo ${var_name:+NewValue}   #由于var_name为空，因此返回null。
+    /> echo $var_name                       #var_name仍然保持原有的空值。
+
+    #${variable+word}的示例，其伪码表示形式为：
+    #    if (variable is set)
+    #        return word;
+    #    else
+    #        return $variable;
+    /> var_name=OldValue                  #设置变量var_name，其值为非空。
+    /> echo ${var_name+NewValue}   #由于var_name有值，因此返回NewValue
+    NewValue
+    /> echo $var_name                       #var_name的值仍然为远之OldValue
+    OldValue
+    /> unset var_name                        #取消对变量var_name的设置。
+    /> echo ${var_name+NewValue}   #返回空值。
+    /> echo $var_name                       #var_name仍未被设置。
+
+    #${variable:?word}的示例，其C语言表示形式为：
+    #    if (NULL != variable) {
+    #        return variable;
+    #    } else {
+    #        if (NULL != word)
+    #            return "variable : word";
+    #        else
+    #            return "parameter null or not set";
+    #    }
+    /> var_name=OldValue                  #设置变量var_name，其值为非空。
+    /> echo ${var_name:?NewValue}   #由于var_name有值，因此返回变量的原有值
+    OldValue
+    /> unset var_name                        #将var_name置为空值。
+    /> var_name=
+    /> echo ${var_name:?NewValue}   #由于var_name为空，因此返回word。
+    -bash: var_name: NewValue
+    /> echo $var_name                       #var_name仍然保持原有的空值。
+
+    /> echo ${var_name:?}                #如果word为空，返回下面的输出。
+    -bash: var_name: parameter null or not set
+
+    #${variable:offset}示例：
+    /> var_name=notebook
+    /> echo ${var_name:2}
+    tebook
+    /> echo ${var_name:0}                #如果offset为0，则取var_name的全部值。
+    notebook
+
+    ${variable:offset:length}示例：
+    /> var_name=notebook
+    /> echo ${var_name:0:4}
+    note
+    /> echo ${var_name:4:4}
+    book
+
+    6.  变量模式匹配运算符:
+    Shell中还提供了一组模式匹配运算符，见下表：
+运算符
+替换
+${variable#pattern}
+如果模式匹配变量值的开头，则删除匹配的最短部分，并返回剩下的部分，变量原值不变。
+${variable##pattern}
+如果模式匹配变量值的开头，则删除匹配的最长部分，并返回剩下的部分，变量原值不变。
+${variable%pattern}
+如果模式匹配变量值的结尾，则删除匹配的最短部分，并返回剩下的部分，变量原值不变。
+${variable%%pattern}
+如果模式匹配变量值的结尾，则删除匹配的最长部分，并返回剩下的部分，变量原值不变。
+${#variable}
+返回变量中字母的数量。
+
+    #${variable#pattern}示例：
+    /> pathname="/home/stephen/mycode/test.h"
+    /> echo ${pathname#/home}        #变量pathname开始处匹配/home的最短部分被删除。
+    /stephen/mycode/test.h
+    /> echo $pathname                       #pathname的原值不变。
+    /home/stephen/mycode/test.h
+
+    #${variable##pattern}示例：
+    /> pathname="/home/stephen/mycode/test.h"
+    /> echo ${pathname##*/}            #变量pathname开始处匹配*/的最长部分被删除，*表示任意字符。
+    test.h
+    /> echo $pathname                       #pathname的原值不变。
+    /home/stephen/mycode/test.h
+
+    #${variable%pattern}示例：
+    /> pathname="/home/stephen/mycode/test.h"
+    /> echo ${pathname%/*}             #变量pathname结尾处匹配/*的最短部分被删除。
+    /home/stephen/mycode
+    /> echo $pathname                       #pathname的原值不变。
+    /home/stephen/mycode/test.h
+
+    #${variable%%pattern}示例：
+    /> pathname="/home/stephen/mycode/test.h"
+    /> echo ${pathname%%/*}          #变量pathname结尾处匹配/*的最长部分被删除，这里所有字符串均被删除。
+
+    /> echo $pathname                       #pathname的原值不变。
+    /home/stephen/mycode/test.h
+
+    #${#variable}示例:
+    /> name="stephen liu"
+    /> echo ${#name}
+    11
+
+    7.  Shell中的内置变量:
+    Shell中提供了一些以$开头的内置变量，见下表：
+变量名
+描述
+$?
+表示Shell命令的返回值
+$$
+表示当前Shell的pid
+$-
+表示当前Shell的命令行选项
+$!
+最后一个放入后台作业的PID值
+$0
+表示脚本的名字
+$1--$9
+表示脚本的第一到九个参数
+${10}
+表示脚本的第十个参数
+$#
+表示参数的个数
+$*,$@
+表示所有的参数，有双引号时除外，"$*"表示赋值到一个变量，"$@"表示赋值到多个。
+    所有的内置变量都比较容易理解，因此这里仅给出$*和$@的区别用法：
+    /> set 'apple pie' pears peaches
+    /> for i in $*
+    >  do
+    >  echo $i
+    >  done
+    apple
+    pie
+    pears
+    peaches
+
+    /> set 'apple pie' pears peaches
+    /> for i in $@
+    >  do
+    >  echo $i
+    >  done
+    apple
+    pie
+    pears
+    peaches
+
+    /> set 'apple pie' pears peaches
+    /> for i in "$*"           #将所有参数变量视为一个
+    >  do
+    >  echo $i
+    >  done
+    apple pie pears    peaches
+    
+    /> set 'apple pie' pears peaches
+    /> for i in "$@"
+    >  do
+    >  echo $i
+    >  done
+    apple pie                   #这里的单引号将两个单词合成一个.
+    pears
+    peaches    
+    
+    8.  引用:
+    Shell中提供三种引用字符，分别是：反斜杠、单引号和双引号，它们可以使Shell中所有元字符失去其特殊功能，而还原其本意。见以下元字符列表：
+元字符
+描述
+;
+命令分隔符
+&
+后台处理Shell命令
+()
+命令组，创建一个子Shell
+{}
+命令组，但是不创建子Shell
+|
+管道
+< >
+输入输出重定向
+$
+变量前缀
+*[]?
+用于文件名扩展的Shell通配符
+    注：单引号和双引号唯一的区别就是，双引号内可以包含变量和命令替换，而单引号则不会解释这些，见如下示例：
+    /> name=Stephen
+    /> echo "Hi $name, I'm glad to meet you! "  #name变量被替换
+    Hi Stephen, I'm glad to meet you!
+    /> echo 'Hi $name, I am glad to meet you! ' #name变量没有被替换
+    Hi $name, I am glad to meet you!
+    /> echo "Hey $name, the time is $(date)"      #name变量和date命令均被替换
+    Hey Stephen, the time is Fri Nov 18 16:27:31 CST 2011
+    /> echo 'Hey $name, the time is $(date)'
+    Hey $name, the time is $(date)                      #name变量和date命令均未被替换
+
+    9.  命令替换:
+    同样我们需要把命令的输出结果赋值给一个变量或者需要用字符串替换变量的输出结果时，我们可以使用变量替换。在Shell中，通常使用反引号的方法进行命令替换。
+    /> d=`date`                           #将date命令的执行结果赋值给d变量。
+    /> echo $d
+    Fri Nov 18 16:35:28 CST 2011
+    /> pwd
+    /home/stephen
+    /> echo `basename \`pwd\``  #基于反引号的命令替换是可嵌入的，但是嵌入命令的反引号需要使用反斜杠转义。
+    stephen
+    除了反引号可以用于命令替换，这里我们也可以使用$(command)形式用于命令替换。
+    /> d=$(date)
+    /> echo $d
+    Fri Nov 18 16:42:33 CST 2011
+    /> dirname="$(basename $(pwd))"     #和之前的反引号一样，该方式也支持嵌套。
+    /> echo $dirname
+    stephen
+
+   10.  数学扩展:
+    Shell中提供了两种计算数学表达式的格式：$[ expression ]和$(( expression ))。
+    /> echo $[5+4-2]
+    7
+    /> echo $[5+2*3]
+    11
+    /> echo $((5+4-2))
+    7
+    /> echo $((5+2*3))
+    11    
+    事实上，我们也可以在Shell中声明数值型的变量，这需要在declare命令的后面添加-i选项，如：
+    /> declare -i num
+    /> num=5+5      #注意在赋值的过程中，所有的符号之间均没有空格，如果需要空格，需要在表达式的外面加双引号
+    /> echo $num    #如果没有声明declare -i num，该命令将返回5+5
+    10
+    /> num="5 * 5"
+    /> echo $num
+    25
+    /> declare strnum
+    /> strnum=5+5
+    /> echo $strnum #由于并未将strnum声明为数值型，因此该输出将按字符串方式处理。
+    5+5
+    Shell还允许我们以不同进制的方式显示数值型变量的输出结果，其格式为：进制+#+变量。
+    /> declare -i x=017 #017其格式为八进制格式
+    /> echo $x           #缺省是十进制
+    15
+    /> x=2#101         #二进制
+    /> echo $x
+    5
+    /> x=8#17           #八进制
+    /> echo $x
+    15
+    /> x=16#b           #十六进制
+    /> echo $x
+    11
+    在Shell中还提供了一个内置命令let，专门用于计算数学运算的，见如下示例：
+    /> let i=5
+    /> let i=i+1
+    /> echo $i
+    6
+    /> let "i = i + 2"
+    /> echo $i
+    8
+    /> let "i+=1"
+    /> echo $i
+    9    
+
+    11.  数组:
+    Shell中提供了创建一维数组的能力，你可以把一串数字、名字或者文件放在一个变量中。使用declare的-a选项即可创建它们，或者在变量后面增加下标操作符直接创建。和很多其它开发语言一样，Shell中的数组也是0开始的，然而不同的是Shell中数组的下标是可以不连续的。获取数组中某个元素的语法格式为: ${arrayname[index]}。见如下示例：
+    /> declare -a friends                   #声明一个数组变量
+    /> friends=(sheryl peter louise)   #给数组变量赋值
+    /> echo ${friends[0]}                #通过数组下标的方式访问数组的元素
+    sheryl
+    /> echo ${friends[1]}
+    peter
+    /> echo ${friends[2]}
+    louise
+    /> echo ${friends[*]}                #下标中星号表示所有元素。
+    shery1 peter louise
+    # ${#array[*]}表示数组中元素的数量，而${#friend[0]}则表示第一个元素的长度。
+    /> echo ${#friends[*]}    
+    3
+    /> unset friends                         #unset array清空整个数组，unset array[index]仅清空指定下标的元素。
+
+    /> x[3]=100
+    /> echo ${x[*]}
+    100
+    /> echo ${x[0]}                        #0下标的元素并没有被赋值过，因为输出为空。
+
+    /> echo ${x[3]}
+    100
+    /> states=(ME [3]=CA [2]=CT)   #ME的下标为0。
+    /> echo ${states[0]}
+    ME
+    /> echo ${states[1]}                 #数组下标为1的位置没有被赋值过，因此没有输出。
+
+    /> echo ${states[2]}
+    CT
+    /> echo ${states[3]}
+    CA
+
+    12.  函数:
+    和C语言一样，Shell中也可以创建自己的自定义函数。其格式如下：
+    function_name () { commands; commands; }
+    function function_name { commands; commands; }
+    function function_name () { commands; commands; }
+    函数的参数在函数内是以$[0-9]、${10}...，这种局部变量的方式来访问的。见下面的示例：
+
+    #函数的左花括号和命令之间必须有至少一个空格。每个命令的后面都要有一个分号，即便是最后一个命令
+    /> function greet { echo "Hello $LOGNAME, today is $(date)"; }
+    #此时函数已经驻留在当前的bash shell中，因此使用函数效率更高。
+    /> greet   
+    Hello root, today is Fri Nov 18 20:45:10 CST 2011
+    /> greet() { echo "Hello $LOGNAME, today is $(date)"; }
+    /> greet
+    Hello root, today is Fri Nov 18 20:46:40 CST 2011
+    #welcome函数内部使用了函数参数。
+    /> function welcome { echo "Hi $1 and $2"; }
+    /> welcome stephen jane    
+    Hi stephen and jane
+    #declare -F选项将列出当前Shell中驻留的函数
+    /> declare -F
+    declare -f greet
+    declare -f welcome
+    #清空指定的函数，使其不在Shell中驻留。
+    /> unset -f welcome
+
+    13.  重定向:
+    下面的列表为Shell中支持的重新定向操作符。
+操作符
+功能
+<
+重新定向输入
+>
+重新定向输出
+>>
+追加输出
+2>
+重新定向错误
+&>
+重新定向错误和输出
+>&
+重新定向错误和输出
+2>&1
+重新定向错误到标准输出
+1>&2
+重新定向标准输出到错误
+>|
+重新定向输出的时候覆盖noclobber选项
+
+    #find命令将搜索结果输出到foundit文件，把错误信息输出到/dev/null
+    /> find . -name "*.c" -print > foundit 2> /dev/null
+    #将find命令的搜索结果和错误信息均输出到foundit文件中。
+    /> find . -name "*.c" -print >& foundit
+    #同上。
+    /> find . -name "*.c" -print > foundit 2>&1
+    #echo命令先将错误输出到errfile，再把信息发送到标准错误，该信息标准错误与标准输出合并在一起(errfile中)。
+    /> echo "File needs an argument" 2> errfile 1>&2
+    /> cat errfile
+    File needs an argument
+分类: Linux Shell
