@@ -1,0 +1,749 @@
+二十三. Bash Shell编程:
+
+    1.  读取用户变量:
+    read命令是用于从终端或者文件中读取输入的内建命令，read命令读取整行输入，每行末尾的换行符不被读入。在read命令后面，如果没有指定变量名，读取的数据将被自动赋值给特定的变量REPLY。下面的列表给出了read命令的常用方式：
+命令格式
+描述
+read answer
+从标准输入读取输入并赋值给变量answer。
+read first last
+从标准输入读取输入到第一个空格或者回车，将输入的第一个单词放到变量first中，并将该行其他的输入放在变量last中。
+read
+从标准输入读取一行并赋值给特定变量REPLY。
+read -a arrayname
+把单词清单读入arrayname的数组里。
+read -p prompt
+打印提示，等待输入，并将输入存储在REPLY中。
+read -r line
+允许输入包含反斜杠。
+
+    见下面的示例(绿色高亮部分的文本为控制台手工输入信息)：
+    /> read answer        #等待读取输入，直到回车后表示输入完毕，并将输入赋值给变量answer
+    Hello                       #控制台输入Hello
+    /> echo $answer      #打印变量
+    Hello
+
+    #等待一组输入，每个单词之间使用空格隔开，直到回车结束，并分别将单词依次赋值给这三个读入变量。
+    /> read one two three
+    1 2 3                      #在控制台输入1 2 3，它们之间用空格隔开。
+    /> echo "one = $one, two = $two, three = $three"
+    one = 1, two = 2, three = 3
+
+    /> read                  #等待控制台输入，并将结果赋值给特定内置变量REPLY。
+    This is REPLY          #在控制台输入该行。
+    /> echo $REPLY      #打印输出特定内置变量REPLY，以确认是否被正确赋值。
+    This is REPLY
+
+    /> read -p "Enter your name: "    #输出"Enter your name: "文本提示，同时等待输入，并将结果赋值给REPLY。
+    Enter you name: stephen            #在提示文本之后输入stephen
+    /> echo $REPLY
+    stephen
+
+    #等待控制台输入，并将输入信息视为数组，赋值给数组变量friends，输入信息用空格隔开数组的每个元素
+    /> read -a friends
+    Tim Tom Helen
+    /> echo "I have ${#friends} friends"
+    I have 3 friends
+    /> echo "They are ${friends[0]}, ${friends[1]} and ${friends[2]}."
+    They are Tim, Tom and Helen.
+
+   2.  状态判断:
+    test是Shell中提供的内置命令，主要用于状态的检验，如果结果为0，表示成功，否则表示失败。见如下示例：
+    /> name=stephen
+    /> test $name != stephen
+    /> echo $?
+    1
+    需要注意的是test命令不支持Shell中提供的各种通配符，如：
+    /> test $name = [Ss]tephen
+    /> echo $?
+    1
+    test命令还可以中括号予以替换，其语义保持不变，如：
+    /> [ $name = stephen ]
+    /> echo $?
+    0    
+    在Shell中还提供了另外一种用于状态判断的方式：[[ expr ]]，和test不同的是，该方式中的表达式支持通配符，如：
+    /> name=stephen
+    /> [[ $name == [Ss]tephen ]]
+    /> echo $?
+    0
+    #在[[ expression ]]中，expression可以包含&&(逻辑与)和||(逻辑或)。
+    /> [[ $name == [Ss]tephen && $friend == "Jose" ]]
+    /> echo $?
+    1
+    /> shopt -s extglob   #打开Shell的扩展匹配模式。
+    /> name=Tommy
+    # "[Tt]o+(m)y"的含义为，以T或t开头，后面跟着一个o，再跟着一个或者多个m，最后以一个y结尾。
+    /> [[ $name == [Tt]o+(m)y ]] 
+    /> echo $?
+    0
+    在Shell中还提供了let命令的判断方式： (( expr ))，该方式的expr部分，和C语言提供的表达式规则一致，如：
+    /> x=2
+    /> y=3
+    /> (( x > 2 ))
+    /> echo $?
+    1
+    /> (( x < 2 ))
+    /> echo $?
+    0　　
+    /> (( x == 2 && y == 3 ))
+    /> echo $?
+    0
+    /> (( x > 2 || y < 3 ))
+    /> echo $?
+    1
+    下面的表格是test命令支持的操作符：
+判断操作符
+判断为真的条件
+字符串判断
+ 
+[ stringA=stringB ]
+stringA等于stringB
+[ stringA==stringB ]
+stringA等于stringB
+[ stringA!=stringB ]
+stringA不等于stringB
+[ string ]
+string不为空
+[ -z string ]
+string长度为0
+[ -n string ]
+string长度不为0
+逻辑判断
+ 
+[ stringA -a stringB ]
+stringA和stringB都是真
+[ stringA -o stringB ]
+stringA或stringB是真
+[ !string ]
+string不为真
+逻辑判断(复合判断)
+ 
+[[ pattern1 && pattern2 ]]
+pattern1和pattern2都是真
+[[ pattern1 || pattern2 ]
+pattern1或pattern2是真
+[[ !pattern ]]
+pattern不为真
+整数判断
+ 
+[ intA -eq intB ]
+intA等于intB
+[ intA -ne intB ]
+intA不等于intB
+[ intA -gt intB ]
+intA大于intB
+[ intA -ge intB ]
+intA大于等于intB
+[ intA -lt intB ]
+intA小于intB
+[ intA -le intB ]
+intA小于等于intB
+文件判断中的二进制操作
+ 
+[ fileA -nt fileB ]
+fileA比fileB新
+[ fileA -ot fileB ]
+fileA比fileB旧
+[ fileA -ef fileB ]
+fileA和fileB有相同的设备或者inode值
+文件检验
+ 
+[ -d $file ] or [[ -d $file ]]
+file为目录且存在时为真
+[ -e $file ] or [[ -e $file ]]
+file为文件且存在时为真
+[ -f $file ] or [[ -f $file ]]
+file为非目录普通文件存在时为真
+[ -s $file ] or [[ -s $file ]]
+file文件存在, 且长度不为0时为真
+[ -L $file ] or [[ -L $file ]]
+file为链接符且存在时为真
+[ -r $file ] or [[ -r $file ]]
+file文件存在且可读时为真
+[ -w $file ] or [[ -w $file ]]
+file文件存在且可写时为真
+[ -x $file ] or [[ -x $file ]]
+file文件存在且可执行时为真
+    注：在逻辑判断(复合判读中)，pattern可以包含元字符，在字符串的判断中，pattern2必须被包含在引号中。
+
+    let命令支持的操作符和C语言中支持的操作符完全相同，如：
+    +,-,*,/,%            加，减，乘，除，去模
+    >>,<<                右移和左移
+    >=,<=,==,!=      大于等于，小于等于，等于，不等于
+    &,|,^                  按位与，或，非
+    &&,||,!                逻辑与，逻辑或和取反
+    还有其含义和C语言等同的快捷操作符，如=,*=,/=,%=,+=,-=,<<=,>>=,&=,|=,^=。
+
+    3.  流程控制语句:
+    if语句格式如下：
+    #if语句的后面是Shell命令，如果该命令执行成功返回0，则执行then后面的命令。
+    if command        
+    then
+        command
+        command
+    fi
+    #用test命令测试其后面expression的结果，如果为真，则执行then后面的命令。
+    if test expression
+    then
+        command
+    fi
+    #下面的格式和test expression等同
+    if [ string/numeric expression ]
+    then
+        command
+    fi
+    #下面的两种格式也可以用于判断语句的条件表达式，而且它们也是目前比较常用的两种。
+    if [[ string expression ]]
+    then
+        command
+    fi
+
+    if (( numeric expression ))           #let表达式
+    then
+        command
+    fi
+    见如下示例：
+    /> cat > test1.sh                       #从命令行直接编辑test1.sh文件。
+    echo -e "Are you OK(y/n)? \c"
+    read answer
+    #这里的$answer变量必须要用双引号扩住，否则判断将失败。当变量$answer等于y或Y时，支持下面的echo命令。
+    if [ "$answer" = y -o "$answer" = Y ]   
+    then
+        echo "Glad to see it."
+    fi
+    CTRL+D  
+    /> . ./test1.sh
+    Are you OK(y/n)? y
+    Glad to see it.
+    上面的判断还可以替换为：
+    /> cat > test2.sh
+    echo -e "Are you OK(y/n or Maybe)? \c"
+    read answer
+    # [[ ]]复合命令操作符允许其中的表达式包含元字符，这里输入以y或Y开头的任意单词，或Maybe都执行then后面的echo。
+    if [[ $answer == [yY]* || $answer = Maybe ]]  
+    then
+        echo "Glad to hear it.
+    fi
+    CTRL+D
+    /> . ./test2.sh
+    Are you OK(y/n or Maybe)? yes
+    Glad to hear it.
+    下面的例子将使用Shell中的扩展通配模式。
+    /> shopt -s extglob        #打开该扩展模式
+    /> answer="not really"
+    /> if [[ $answer = [Nn]o?( way |t really) ]]
+    > then
+    >    echo "I am sorry."
+    > fi
+    I am sorry.
+    对于本示例中的扩展通配符，这里需要给出一个具体的解释。[Nn]o匹配No或no，?( way|t really)则表示0个或1个( way或t really),因此answer变量匹配的字符串为No、no、Not really、not really、No way、no way。
+    下面的示例使用了let命令操作符，如：
+    /> cat > test3.sh
+    if (( $# != 2 ))                    #等同于 [ $# -ne 2 ]
+    then
+        echo "Usage: $0 arg1 arg2" 1>&2
+        exit 1                         #exit退出值为0-255之间，只有0表示成功。
+    fi
+    if (( $1 < 0 || $1 > 30 ))      #等同于 [ $1 -lt 0 -o $1 -gt 30 ]
+    then
+        echo "arg1 is out of range."
+        exit 2
+    fi
+    if (( $2 <= 20 ))                  #等同于 [ $2 -le 20 ]
+    then
+        echo "arg2 is out of range."
+    fi
+    CTRL+D
+    /> sh ./test3.sh
+    Usage: ./test3.sh arg1 arg2
+    /> echo $?                          #Shell脚本的退出值为exit的参数值。
+    1
+    /> sh ./test3.sh 40 30
+    arg1 is out of range.
+    /> echo $?
+    2
+    下面的示例为如何在if的条件表达式中检验空变量：
+    /> cat > test4.sh
+    if [ "$name" = "" ]                #双引号就表示空字符串。
+    then
+        echo "name is null."
+    fi
+    CTRL+D
+    /> . ./test4.sh
+    name is null.
+
+    if/elif/else语句的使用方式和if语句极为相似，相信有编程经验的人都不会陌生，这里就不在赘述了，其格式如下：
+    if command
+    then 
+        command
+    elif command
+    then
+        command
+    else
+        command
+    fi
+    见如下示例脚本：
+    /> cat > test5.sh
+    echo -e "How old are you? \c"
+    read age
+    if [ $age -lt 0 -o $age -gt 120 ]                #等同于 (( age < 0 || age > 120 ))
+    then
+        echo "You are so old."
+    elif [ $age -ge 0 -a $age -le 12 ]               #等同于 (( age >= 0 && age <= 12 ))
+    then
+        echo "You are child."
+    elif [ $age -ge 13 -a $age -le 19 ]             #等同于 (( age >= 13 && age <= 19 ))
+    then
+        echo "You are 13--19 years old."
+    elif [ $age -ge 20 -a $age -le 29 ]             #等同于 (( age >= 20 && age <= 29 ))
+    then
+        echo "You are 20--29 years old."
+    elif [ $age -ge 30 -a $age -le 39 ]             #等同于 (( age >= 30 && age <= 39 ))
+    then
+        echo "You are 30--39 years old."
+    else
+        echo "You are above 40."
+    fi
+    CTRL+D
+    /> . ./test5.sh
+    How old are you? 50
+    You are above 40.
+
+    case语句格式如下：
+    case variable in
+    value1)
+        command
+        ;;            #相同于C语言中case语句内的break。
+    value2)
+        command
+        ;;
+    *)                #相同于C语言中switch语句内的default
+       command
+        ;;
+    esac
+    见如下示例脚本：
+    /> cat > test6.sh
+    #!/bin/sh
+    echo -n "Choose a color: "
+    read color
+    case "$color" in
+    [Bb]l??)
+        echo "you select blue color."
+        ;;
+    [Gg]ree*)
+        echo "you select green color."
+        ;;
+    red|orange)
+        echo "you select red or orange."
+        ;;
+    *)
+        echo "you select other color."
+        ;;
+    esac
+    echo "Out of case command."
+    /> . ./test6.sh
+    Choose a color: green
+    you select green color.
+    Out of case command.
+
+   4.  循环语句:
+    Bash Shell中主要提供了三种循环方式：for、while和until。
+    for循环声明格式：
+    for variable in word_list
+    do
+        command
+    done
+    见如下示例脚本：
+    /> cat > test7.sh
+    for score in math english physics chemist   #for将循环读取in后面的单词列表，类似于Java的for-each。
+    do
+        echo "score = $score"
+    done
+    echo "out of for loop"
+    CTRL+D
+    /> . ./test7.sh
+    score = math
+    score = english
+    score = physics
+    score = chemist
+    out of for loop
+
+    /> cat > mylist   #构造数据文件
+    tom
+    patty
+    ann
+    jake
+    CTRL+D
+    /> cat > test8.sh
+    #!/bin/sh
+    for person in $(cat mylist)                 #for将循环读取cat mylist命令的执行结果。
+    do
+        echo "person = $person"
+    done
+    echo "out of for loop."
+    CTRL+D
+    /> . ./test8.sh
+    person = tom
+    person = patty
+    person = ann
+    person = jake
+    out of for loop.
+
+    /> cat > test9.sh
+    for file in test[1-8].sh                        #for将读取test1-test8，后缀为.sh的文件
+    do
+        if [ -f $file ]                              #判断文件在当前目录是否存在。
+        then
+            echo "$file exists."
+        fi
+    done
+    CTRL+D
+    /> . ./test9.sh
+    test2.sh exists.
+    test3.sh exists.
+    test4.sh exists.
+    test5.sh exists.
+    test6.sh exists.
+    test7.sh exists.
+    test8.sh exists.
+
+    /> cat > test10.sh
+    for name in $*                                  #读取脚本的命令行参数数组，还可以写成for name的简化形式。
+    do
+        echo "Hi, $name"
+    done
+    CTRL+D
+    /> . ./test10.sh stephen ann
+    Hi, stephen
+    Hi, ann
+
+    while循环声明格式：
+    while command  #如果command命令的执行结果为0，或条件判断为真时，执行循环体内的命令。
+    do
+        command
+    done
+    见如下示例脚本：
+    /> cat > test1.sh  
+    num=0
+    while (( num < 10 ))               #等同于 [ $num -lt 10 ]
+    do
+        echo -n "$num "
+        let num+=1
+    done
+    echo -e "\nHere's out of loop."
+    CTRL+D
+    /> . ./test1.sh
+    0 1 2 3 4 5 6 7 8 9 
+    Here's out of loop.
+
+    /> cat > test2.sh
+    go=start
+    echo Type q to quit.
+    while [[ -n $go ]]                     #等同于[ -n "$go" ]，如使用该风格，$go需要被双引号括起。
+    do
+        echo -n How are you.
+        read word
+        if [[ $word == [Qq] ]]      #等同于[ "$word" = Q -o "$word" = q ]
+        then
+            echo Bye.
+            go=                        #将go变量的值置空。
+        fi
+    done
+    CTRL+D
+    /> . ./test2.sh
+    How are you. Hi
+    How are you. q
+    Bye.
+
+    until循环声明格式:
+    until command                         #其判断条件和while正好相反，即command返回非0，或条件为假时执行循环体内的命令。
+    do
+        command
+    done
+    见如下示例脚本：
+    /> cat > test3.sh
+    until who | grep stephen           #循环体内的命令将被执行，直到stephen登录，即grep命令的返回值为0时才退出循环。
+    do
+        sleep 1
+        echo "Stephen still doesn't login."
+    done
+    CTRL+D
+
+    shift命令声明格式:shift [n]
+    shift命令用来把脚本的位置参数列表向左移动指定的位数(n)，如果shift没有参数，则将参数列表向左移动一位。一旦移位发生，被移出列表的参数就被永远删除了。通常在while循环中，shift用来读取列表中的参数变量。
+    见如下示例脚本：
+    /> set stephen ann sheryl mark #设置4个参数变量。
+    /> shift                                    #向左移动参数列表一次，将stephen移出参数列表。
+    /> echo $*
+    ann sheryl mark
+    /> shift 2                                 #继续向左移动两位，将sheryl和ann移出参数列表
+    /> echo $*
+    mark
+    /> shift 2                                 #继续向左移动两位，由于参数列表中只有mark了，因此本次移动失败。
+    /> echo $*
+    mark
+
+    /> cat > test4.sh
+    while (( $# > 0 ))                    #等同于 [ $# -gt 0 ]
+    do
+        echo $*
+        shift
+    done
+    CTRL+D
+    /> . ./test4.sh a b c d e
+    a b c d e
+    b c d e
+    c d e
+    d e
+    e        
+
+    break命令声明格式：break [n]
+    和C语言不同的是，Shell中break命令携带一个参数，即可以指定退出循环的层数。如果没有指定，其行为和C语言一样，即退出最内层循环。如果指定循环的层数，则退出指定层数的循环体。如果有3层嵌套循环，其中最外层的为1，中间的为2，最里面的是3。
+    见如下示例脚本:
+    /> cat > test5.sh
+    while true
+    do
+        echo -n "Are you ready to move on?"
+        read answer
+        if [[ $answer == [Yy] ]]
+        then
+            break
+        else
+            echo "Come on."
+        fi
+    done
+    echo "Here we are."
+    CTRL+D
+    /> . ./test5.sh
+    Are you ready to move on? y
+    Here we are
+
+    continue命令声明格式：continue [n]
+    和C语言不同的是，Shell中continue命令携带一个参数，即可以跳转到指定层级的循环顶部。如果没有指定，其行为和C语言一样，即跳转到最内层循环的顶部。如果指定循环的层数，则跳转到指定层级循环的顶部。如果有3层嵌套循环，其中最外层的为3，中间的为2，最里面的是1。
+    /> cat  maillist                       #测试数据文件maillist的内容为以下信息。
+    stephen
+    ann
+    sheryl
+    mark
+
+    /> cat > test6.sh
+    for name in $(cat maillist)
+    do
+        if [[ $name == stephen ]]; then
+            continue
+        else
+            echo "Hello, $name."
+        fi
+    done
+    CTRL+D
+    /> . ./test6.sh
+    Hello, ann.
+    Hello, sheryl.
+    Hello, mark.
+
+    I/O重新定向和子Shell：
+    文件中的输入可以通过管道重新定向给一个循环，输出也可以通过管道重新定向给一个文件。Shell启动一个子Shell来处理I/O重新定向和管道。在循环终止时，循环内部定义的任何变量对于脚本的其他部分来说都是不看见的。
+    /> cat > demodata                        #为下面的脚本构造册数数据
+    abc
+    def
+    ghi
+    CRTL+D
+    /> cat > test7.sh
+    if (( $# < 1 ))                                #如果脚本参数的数量小于1，则给出错误提示后退出。
+    then
+        echo "Usage: $0 filename " >&2
+        exit 1
+    fi
+    count=1
+    cat $1 | while read line                   #参数一中的文件被cat命令输出后，通过管道逐行输出给while read line。
+    do
+        let $((count == 1)) && echo "Processing file $1..." > /dev/tty  #该行的echo将输出到当前终端窗口。
+        echo -e "$count\t$line"              #将输出行号和文件中该行的内容，中间用制表符隔开。
+        let count+=1
+    done > outfile                               #将while循环中所有的输出，除了>/dev/tty之外，其它的全部输出到outfile文件。
+    CTRL+D
+    /> . ./test7.sh demodata                #只有一行输出，其余的都输出到outfile中了。
+    Processing file demodata...
+    /> cat outfile
+    1       abc
+    2       def
+    3       ghi
+
+    /> cat > test8.sh
+    for i in 9 7 2 3 5 4
+    do
+        echo $i
+    done | sort -n                                #直接将echo的输出通过管道重定向sort命令。
+    CTRL+D
+    /> . ./test8.sh
+    2
+    3
+    4
+    5
+    7
+    9
+
+    5.  IFS和循环：
+    Shell的内部域分隔符可以是空格、制表符和换行符。它可以作为命令的分隔符用在例如read、set和for等命令中。如果在列表中使用不同的分隔符，用户可以自己定义这个符号。在修改之前将IFS原始符号的值保存在另外一个变量中，这样在需要的时候还可以还原。
+    见如下示例脚本：
+    /> cat > test9.sh
+    names=Stephen:Ann:Sheryl:John   #names变量包含的值用冒号分隔。
+    oldifs=$IFS                                   #保留原有IFS到oldifs变量，便于后面的还原。
+    IFS=":"                            
+    for friends in $names                     #这是遍历以冒号分隔的names变量值。    
+    do
+        echo Hi $friends
+    done
+    IFS=$oldifs                                   #将IFS还原为原有的值。
+    set Jerry Tom Angela
+    for classmates in $*                      #再以原有IFS的值变量参数列表。
+    do
+        echo Hello $classmates
+    done
+    CTRL+D
+    /> . ./test9.sh
+    Hi Stephen
+    Hi Ann
+    Hi Sheryl
+    Hi John
+    Hello Jerry
+    Hello Tom
+    Hello Angela
+
+    6.  函数：
+    Shell中函数的职能以及优势和C语言或其它开发语言基本相同，只是语法格式上的一些差异。下面是Shell中使用函数的一些基本规则：
+    1) 函数在使用前必须定义。
+    2) 函数在当前环境下运行，它和调用它的脚本共享变量，并通过位置参量传递参数。而该位置参量将仅限于该函数，不会影响到脚本的其它地方。
+    3) 通过local函数可以在函数内建立本地变量，该变量在出了函数的作用域之后将不在有效。
+    4) 函数中调用exit，也将退出整个脚本。
+    5) 函数中的return命令返回函数中最后一个命令的退出状态或给定的参数值，该参数值的范围是0-256之间。如果没有return命令，函数将返回最后一个Shell的退出值。
+    6) 如果函数保存在其它文件中，就必须通过source或dot命令把它们装入当前脚本。
+    7) 函数可以递归。
+    8) 将函数从Shell中清空需要执行：unset -f function_name。
+    9) 将函数输出到子Shell需要执行：export -f function_name。
+    10) 可以像捕捉Shell命令的返回值一样获取函数的返回值，如$(function_name)。
+    Shell中函数的声明格式如下：
+    function function_name { command; command; }
+    见如下示例脚本：
+    /> cat > test1.sh
+    function increment() {            #定义函数increment。
+        local sum                           #定义本地变量sum。
+        let "sum=$1+1"    
+        return $sum                      #返回值是sum的值。
+    }
+    echo -n "The num is "
+    increment 5                          #increment函数调用。
+    echo $?                                #输出increment函数的返回值。
+    CTRL+D
+    /> . ./test1.sh
+    The num is 6
+
+    7.  陷阱信号(trap)：
+    在Shell程序运行的时候，可能收到各种信号，有的来自于操作系统，有的来自于键盘，而该Shell在收到信号后就立刻终止运行。但是在有些时候，你可能并不希望在信号到达时，程序就立刻停止运行并退出。而是他能希望忽略这个信号而一直在运行，或者在退出前作一些清除操作。trap命令就允许你控制你的程序在收到信号以后的行为。
+    其格式如下：
+    trap 'command; command' signal-number
+    trap 'command; command' signal-name
+    trap signal-number  
+    trap signal-name
+    后面的两种形式主要用于信号复位，即恢复处理该信号的缺省行为。还需要说明的是，如果trap后面的命令是使用单引号括起来的，那么该命令只有在捕获到指定信号时才被执行。如果是双引号，则是在trap设置时就可以执行变量和命令替换了。
+    下面是系统给出的信号数字和信号名称的对照表：
+    1)SIGHUP 2)SIGINT 3)SIGQUIT 4)SIGILL 5)SIGTRAP 6)SIGABRT 7)SIGBUS 8)SIGFPE
+    9)SIGKILL 10) SIGUSR1 11)SIGEGV 12)SIGUSR2 13)SIGPIPE 14)SIGALRM 15)SIGTERM 17)SIGCHLD
+    18)SIGCONT 19)SIGSTOP ... ...
+    见如下示例脚本：
+    /> trap 'rm tmp*;exit 1' 1 2 15      #该命令表示在收到信号1、2和15时，该脚本将先执行rm tmp*，然后exit 1退出脚本。
+    /> trap 2                                      #当收到信号2时，将恢复为以前的动作，即退出。
+    /> trap " " 1 2                              #当收到信号1和2时，将忽略这两个信号。
+    /> trap -                                      #表示恢复所有信号处理的原始值。
+    /> trap 'trap 2' 2                           #在第一次收到信号2时，执行trap 2，这时将信号2的处理恢复为缺省模式。在收到信号2时，Shell程序退出。
+    /> cat > test2.sh
+    trap 'echo "Control+C will not terminate $0."' 2   #捕获信号2，即在键盘上按CTRL+C。
+    trap 'echo "Control+\ will not terminate $0."' 3   #捕获信号3，即在键盘上按CTRL+\。
+    echo "Enter stop to quit shell."
+    while true                                                        #无限循环。
+    do
+        echo -n "Go Go...."
+        read
+        if [[ $REPLY == [Ss]top ]]                            #直到输入stop或Stop才退出循环和脚本。
+       then
+            break
+        fi
+    done
+    CTRL+D
+    /> . ./test2.sh
+    Enter stop to quit shell.
+    Go Go....^CControl+C will not terminate -bash.
+    ^\Control+\ will not terminate -bash.
+    stop
+
+    8.  用getopts处理命令行选项：
+    这里的getopts命令和C语言中的getopt几乎是一致的，因为脚本的位置参量在有些时候是失效的，如ls -lrt等。这时候-ltr都会被保存在$1中，而我们实际需要的则是三个展开的选项，即-l、-r和-t。见如下带有getopts的示例脚本：
+    /> cat > test3.sh
+    #!/bin/sh
+    while getopts xy options                           #x和y是合法的选项，并且将-x读入到变量options中，读入时会将x前面的横线去掉。
+    do
+        case $options in
+        x) echo "you entered -x as an option" ;;       
+        y) echo "you entered -y as an option" ;;
+        esac
+    done
+    /> ./test3.sh -xy
+    you entered -x as an option
+    you entered -y as an option
+    /> ./test3.sh -x
+    you entered -x as an option
+    /> ./test3.sh -b                                       #如果输入非法选项，getopts会把错误信息输出到标准错误。
+    ./test3.sh: illegal option -- b
+    /> ./test3.sh b                                        #该命令不会有执行结果，因为b的前面有没横线，因此是非法选项，将会导致getopts停止处理并退出。
+
+    /> cat > test4.sh
+    #!/bin/sh
+    while getopts xy options 2>/dev/null         #如果再出现选项错误的情况，该重定向会将错误输出到/dev/null。
+    do
+        case $options in
+        x) echo "you entered -x as an option" ;; 
+        y) echo "you entered -y as an option" ;;
+        \?) echo "Only -x and -y are valid options" 1>&2 # ?表示所有错误的选项，即非-x和-y的选项。
+    esac
+    done
+    /> . ./test4.sh -g                                     #遇到错误的选项将直接执行\?)内的代码。
+    Only -x and -y are valid options
+    /> . ./test4.sh -xg
+    you entered -x as an option
+    Only -x and -y are valid options
+
+    /> cat > test5.sh
+    #!/bin/sh
+    while getopts xyz: arguments 2>/dev/null #z选项后面的冒号用于提示getopts，z选项后面必须有一个参数。
+    do
+        case $arguments in
+        x) echo "you entered -x as an option." ;;
+        y) echo "you entered -y as an option." ;;
+        z) echo "you entered -z as an option."  #z的后面会紧跟一个参数，该参数保存在内置变量OPTARG中。
+            echo "\$OPTARG is $OPTARG.";
+           ;;
+        \?) echo "Usage opts4 [-xy] [-z argument]"
+            exit 1 ;;
+        esac
+    done
+    echo "The number of arguments passed was $(( $OPTIND - 1 ))" #OPTIND保存一下将被处理的选项的位置，他是永远比实际命令行参数多1的数。
+    /> ./test5.sh -xyz foo
+    you entered -x as an option.
+    you entered -y as an option.
+    you entered -z as an option.
+    $OPTARG is foo.
+    The number of arguments passed was 2
+    /> ./test5.sh -x -y -z boo
+    you entered -x as an option.
+    you entered -y as an option.
+    you entered -z as an option.
+    $OPTARG is boo.
+    The number of arguments passed was 4
+
+    9.  eval命令与命令行解析：
+    eval命令可以对命令行求值，做Shell替换，并执行命令行，通常在普通命令行解析不能满足要求时使用。
+    /> set a b c d
+    /> echo The last argument is \$$#
+    The last argument is $4
+    /> eval echo The last argument is \$$#    #eval命令先进行了变量替换，之后再执行echo命令。
+    The last argument is d
