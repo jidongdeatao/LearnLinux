@@ -1,0 +1,389 @@
+十八.  和系统运行状况相关的Shell命令:
+
+    1.  Linux的实时监测命令(watch):
+    watch 是一个非常实用的命令，可以帮你实时监测一个命令的运行结果，省得一遍又一遍的手动运行。该命令最为常用的两个选项是-d和-n，其中-n表示间隔多少秒执行一次"command"，-d表示高亮发生变化的位置。下面列举几个在watch中常用的实时监视命令：
+    /> watch -d -n 1 'who'   #每隔一秒执行一次who命令，以监视服务器当前用户登录的状况
+    Every 1.0s: who       Sat Nov 12 12:37:18 2011
+    
+    stephen  tty1           2011-11-11 17:38 (:0)
+    stephen  pts/0         2011-11-11 17:39 (:0.0)
+    root       pts/1         2011-11-12 10:01 (192.168.149.1)
+    root       pts/2         2011-11-12 11:41 (192.168.149.1)
+    root       pts/3         2011-11-12 12:11 (192.168.149.1)
+    stephen  pts/4         2011-11-12 12:22 (:0.0)
+    此时通过其他Linux客户端工具以root的身份登录当前Linux服务器，再观察watch命令的运行变化。
+    Every 1.0s: who       Sat Nov 12 12:41:09 2011
+    
+    stephen  tty1          2011-11-11 17:38 (:0)
+    stephen  pts/0        2011-11-11 17:39 (:0.0)
+    root       pts/1        2011-11-12 10:01 (192.168.149.1)
+    root       pts/2        2011-11-12 11:41 (192.168.149.1)
+    root       pts/3        2011-11-12 12:40 (192.168.149.1)
+    stephen  pts/4        2011-11-12 12:22 (:0.0)
+    root       pts/5        2011-11-12 12:41 (192.168.149.1)
+    最后一行中被高亮的用户为新登录的root用户。此时按CTRL + C可以退出正在执行的watch监控进程。
+    
+    #watch可以同时运行多个命令，命令间用分号分隔。
+    #以下命令监控磁盘的使用状况，以及当前目录下文件的变化状况，包括文件的新增、删除和文件修改日期的更新等。
+    /> watch -d -n 1 'df -h; ls -l'
+    Every 1.0s: df -h; ls -l     Sat Nov 12 12:55:00 2011
+    
+    Filesystem            Size  Used Avail Use% Mounted on
+    /dev/sda1             5.8G  3.3G  2.2G  61% /
+    tmpfs                 504M  420K  504M   1% /dev/shm
+    total 20
+    -rw-r--r--. 1 root root 10530 Nov 11 23:08 test.tar.bz2
+    -rw-r--r--. 1 root root   183 Nov 11 08:02 users
+    -rw-r--r--. 1 root root   279 Nov 11 08:45 users2
+    此时通过另一个Linux控制台窗口，在watch监视的目录下，如/home/stephen/test，执行下面的命令
+    /> touch aa         #在执行该命令之后，另一个执行watch命令的控制台将有如下变化
+    Every 1.0s: df -h; ls -l                                Sat Nov 12 12:57:08 2011
+    
+    Filesystem            Size  Used Avail Use% Mounted on
+    /dev/sda1             5.8G  3.3G  2.2G  61% /
+    tmpfs                 504M  420K  504M   1% /dev/shm
+    total 20
+    -rw-r--r--. 1 root root        0 Nov 12 12:56 aa
+    -rw-r--r--. 1 root root        0 Nov 12 10:02 datafile3
+    -rw-r--r--. 1 root root 10530 Nov 11 23:08 test.tar.bz2
+    -rw-r--r--. 1 root root     183 Nov 11 08:02 users
+    -rw-r--r--. 1 root root     279 Nov 11 08:45 users2
+    其中黄色高亮的部分，为touch aa命令执行之后watch输出的高亮变化部分。
+    
+    2.  查看当前系统内存使用状况(free)：
+    free命令有以下几个常用选项：
+选项
+说明
+-b
+以字节为单位显示数据。
+-k
+以千字节(KB)为单位显示数据(缺省值)。
+-m
+以兆(MB)为单位显示数据。
+-s delay
+该选项将使free持续不断的刷新，每次刷新之间的间隔为delay指定的秒数，如果含有小数点，将精确到毫秒，如0.5为500毫秒，1为一秒。
+    free命令输出的表格中包含以下几列：
+列名
+说明
+total
+总计物理内存的大小。
+used
+已使用的内存数量。
+free
+可用的内存数量。
+Shared
+多个进程共享的内存总额。
+Buffers/cached
+磁盘缓存的大小。
+
+    见以下具体示例和输出说明：
+    /> free -k
+                        total         used          free     shared    buffers     cached
+    Mem:       1031320     671776     359544          0      88796     352564
+    -/+ buffers/cache:      230416     800904
+    Swap:        204792              0     204792
+    对于free命令的输出，我们只需关注红色高亮的输出行和绿色高亮的输出行，见如下具体解释：
+    红色输出行：该行使从操作系统的角度来看待输出数据的，used(671776)表示内核(Kernel)+Applications+buffers+cached。free(359544)表示系统还有多少内存可供使用。
+    绿色输出行：该行则是从应用程序的角度来看输出数据的。其free = 操作系统used + buffers + cached，既：
+    800904 = 359544 + 88796 + 352564
+    /> free -m
+                      total        used        free      shared    buffers     cached
+    Mem:          1007         656        351            0         86            344
+    -/+ buffers/cache:        225        782
+    Swap:          199             0        199
+    /> free -k -s 1.5  #以千字节(KB)为单位显示数据，同时每隔1.5刷新输出一次，直到按CTRL+C退出
+                      total        used       free     shared    buffers     cached
+    Mem:          1007         655        351          0           86        344
+    -/+ buffers/cache:        224        782
+    Swap:          199             0        199
+
+                      total        used       free     shared    buffers     cached
+    Mem:          1007         655        351          0           86        344
+    -/+ buffers/cache:        224        782
+    Swap:          199             0        199
+
+    3.  CPU的实时监控工具(mpstat)：
+    该命令主要用于报告当前系统中所有CPU的实时运行状况。
+    #该命令将每隔2秒输出一次CPU的当前运行状况信息，一共输出5次，如果没有第二个数字参数，mpstat将每隔两秒执行一次，直到按CTRL+C退出。
+    /> mpstat 2 5  
+    Linux 2.6.32-71.el6.i686 (Stephen-PC)   11/12/2011      _i686_  (1 CPU)
+
+    04:03:00 PM  CPU    %usr   %nice    %sys %iowait    %irq   %soft  %steal  %guest   %idle
+    04:03:02 PM  all    0.00    0.00    0.50    0.00    0.00    0.00    0.00    0.00   99.50
+    04:03:04 PM  all    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00  100.00
+    04:03:06 PM  all    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00  100.00
+    04:03:08 PM  all    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00  100.00
+    04:03:10 PM  all    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00  100.00
+    Average:       all    0.00    0.00    0.10    0.00    0.00    0.00    0.00    0.00   99.90
+
+    第一行的末尾给出了当前系统中CPU的数量。后面的表格中则输出了系统当前CPU的使用状况，以下为每列的含义：
+列名
+说明
+%user
+在internal时间段里，用户态的CPU时间(%)，不包含nice值为负进程  (usr/total)*100
+%nice
+在internal时间段里，nice值为负进程的CPU时间(%)   (nice/total)*100
+%sys
+在internal时间段里，内核时间(%)       (system/total)*100
+%iowait
+在internal时间段里，硬盘IO等待时间(%) (iowait/total)*100
+%irq
+在internal时间段里，硬中断时间(%)     (irq/total)*100
+%soft
+在internal时间段里，软中断时间(%)     (softirq/total)*100
+%idle
+在internal时间段里，CPU除去等待磁盘IO操作外的因为任何原因而空闲的时间闲置时间(%) (idle/total)*100
+    计算公式：
+    total_cur=user+system+nice+idle+iowait+irq+softirq
+    total_pre=pre_user+ pre_system+ pre_nice+ pre_idle+ pre_iowait+ pre_irq+ pre_softirq
+    user=user_cur – user_pre
+    total=total_cur-total_pre
+    其中_cur 表示当前值，_pre表示interval时间前的值。上表中的所有值可取到两位小数点。    
+
+    /> mpstat -P ALL 2 3  #-P ALL表示打印所有CPU的数据，这里也可以打印指定编号的CPU数据，如-P 0(CPU的编号是0开始的)
+    Linux 2.6.32-71.el6.i686 (Stephen-PC)   11/12/2011      _i686_  (1 CPU)
+
+    04:12:54 PM  CPU    %usr   %nice    %sys %iowait    %irq   %soft  %steal  %guest   %idle
+    04:12:56 PM    all      0.00      0.00     0.50    0.00      0.00    0.00    0.00      0.00     99.50
+    04:12:56 PM      0     0.00      0.00     0.50    0.00      0.00    0.00    0.00      0.00     99.50
+
+    04:12:56 PM  CPU    %usr   %nice    %sys %iowait    %irq   %soft  %steal  %guest   %idle
+    04:12:58 PM    all     0.00      0.00     0.00    0.00      0.00    0.00    0.00      0.00    100.00
+    04:12:58 PM     0     0.00      0.00     0.00    0.00      0.00    0.00    0.00      0.00    100.00
+
+    04:12:58 PM  CPU    %usr   %nice    %sys %iowait    %irq   %soft  %steal  %guest   %idle
+    04:13:00 PM    all      0.00     0.00    0.00    0.00      0.00    0.00     0.00      0.00    100.00
+    04:13:00 PM     0      0.00     0.00    0.00    0.00      0.00    0.00     0.00      0.00    100.00
+
+    Average:       CPU    %usr   %nice    %sys %iowait    %irq   %soft  %steal  %guest   %idle
+    Average:         all      0.00     0.00    0.17    0.00      0.00    0.00     0.00      0.00     99.83
+    Average:          0      0.00     0.00    0.17    0.00      0.00    0.00     0.00      0.00     99.83
+
+    4.  虚拟内存的实时监控工具(vmstat)：
+    vmstat命令用来获得UNIX系统有关进程、虚存、页面交换空间及CPU活动的信息。这些信息反映了系统的负载情况。vmstat首次运行时显示自系统启动开始的各项统计信息，之后运行vmstat将显示自上次运行该命令以后的统计信息。用户可以通过指定统计的次数和时间来获得所需的统计信息。
+    /> vmstat 1 3    #这是vmstat最为常用的方式，其含义为每隔1秒输出一条，一共输出3条后程序退出。
+    procs  -----------memory----------   ---swap-- -----io---- --system-- -----cpu-----
+     r  b   swpd      free      buff   cache   si   so     bi    bo     in   cs  us  sy id  wa st
+     0  0        0 531760  67284 231212  108  0     0  260   111  148  1   5 86   8  0
+     0  0        0 531752  67284 231212    0    0     0     0     33   57   0   1 99   0  0
+     0  0        0 531752  67284 231212    0    0     0     0     40   73   0   0 100 0  0
+
+    /> vmstat 1       #其含义为每隔1秒输出一条，直到按CTRL+C后退出。
+
+    下面将给出输出表格中每一列的含义说明：
+    有关进程的信息有：(procs)
+    r:  在就绪状态等待的进程数。
+    b: 在等待状态等待的进程数。    
+    有关内存的信息有：(memory)
+    swpd:  正在使用的swap大小，单位为KB。
+    free:    空闲的内存空间。
+    buff:    已使用的buff大小，对块设备的读写进行缓冲。
+    cache: 已使用的cache大小，文件系统的cache。
+    有关页面交换空间的信息有：(swap)
+    si:  交换内存使用，由磁盘调入内存。
+    so: 交换内存使用，由内存调入磁盘。  
+    有关IO块设备的信息有：(io)
+    bi:  从块设备读入的数据总量(读磁盘) (KB/s)
+    bo: 写入到块设备的数据总理(写磁盘) (KB/s)   
+    有关故障的信息有：(system)
+    in: 在指定时间内的每秒中断次数。
+    sy: 在指定时间内每秒系统调用次数。
+    cs: 在指定时间内每秒上下文切换的次数。   
+    有关CPU的信息有：(cpu)
+    us:  在指定时间间隔内CPU在用户态的利用率。
+    sy:  在指定时间间隔内CPU在核心态的利用率。
+    id:  在指定时间间隔内CPU空闲时间比。
+    wa: 在指定时间间隔内CPU因为等待I/O而空闲的时间比。   
+    vmstat 可以用来确定一个系统的工作是受限于CPU还是受限于内存：如果CPU的sy和us值相加的百分比接近100%，或者运行队列(r)中等待的进程数总是不等于0，且经常大于4，同时id也经常小于40，则该系统受限于CPU；如果bi、bo的值总是不等于0，则该系统受限于内存。
+
+    5.  设备IO负载的实时监控工具(iostat)：
+    iostat主要用于监控系统设备的IO负载情况，iostat首次运行时显示自系统启动开始的各项统计信息，之后运行iostat将显示自上次运行该命令以后的统计信息。用户可以通过指定统计的次数和时间来获得所需的统计信息。
+    其中该命令中最为常用的使用方式如下：
+    /> iostat -d 1 3    #仅显示设备的IO负载，其中每隔1秒刷新并输出结果一次，输出3次后iostat退出。
+    Linux 2.6.32-71.el6.i686 (Stephen-PC)   11/16/2011      _i686_  (1 CPU)
+
+    Device:            tps   Blk_read/s   Blk_wrtn/s   Blk_read   Blk_wrtn
+    sda                 5.35       258.39        26.19     538210      54560
+
+    Device:            tps   Blk_read/s   Blk_wrtn/s   Blk_read   Blk_wrtn
+    sda                 0.00         0.00         0.00                  0          0
+
+    Device:            tps   Blk_read/s   Blk_wrtn/s   Blk_read   Blk_wrtn
+    sda                 0.00         0.00         0.00                  0          0
+
+    Device:            tps   Blk_read/s   Blk_wrtn/s   Blk_read   Blk_wrtn
+    sda                 0.00         0.00         0.00                  0          0
+    /> iostat -d 1  #和上面的命令一样，也是每隔1秒刷新并输出一次，但是该命令将一直输出，直到按CTRL+C退出。
+    下面将给出输出表格中每列的含义：
+列名
+说明
+Blk_read/s
+每秒块(扇区)读取的数量。
+Blk_wrtn/s
+每秒块(扇区)写入的数量。
+Blk_read
+总共块(扇区)读取的数量。
+Blk_wrtn
+总共块(扇区)写入的数量。
+    iostat还有一个比较常用的选项-x，该选项将用于显示和io相关的扩展数据。
+    /> iostat -dx 1 3
+    Device:  rrqm/s wrqm/s  r/s   w/s  rsec/s wsec/s avgrq-sz avgqu-sz   await  svctm  %util
+    sda            5.27   1.31 2.82 1.14 189.49  19.50    52.75     0.53     133.04  10.74   4.26
+
+    Device:  rrqm/s wrqm/s  r/s   w/s  rsec/s wsec/s avgrq-sz avgqu-sz   await  svctm  %util
+    sda            0.00   0.00 0.00 0.00   0.00   0.00        0.00     0.00         0.00   0.00   0.00
+
+    Device:  rrqm/s wrqm/s  r/s   w/s  rsec/s wsec/s avgrq-sz avgqu-sz   await  svctm  %util
+    sda            0.00   0.00 0.00 0.00   0.00   0.00        0.00     0.00         0.00   0.00   0.00
+    还可以在命令行参数中指定要监控的设备名，如：
+    /> iostat -dx sda 1 3   #指定监控的设备名称为sda，该命令的输出结果和上面命令完全相同。
+
+    下面给出扩展选项输出的表格中每列的含义：
+列名
+说明
+rrqm/s
+队列中每秒钟合并的读请求数量
+wrqm/s
+队列中每秒钟合并的写请求数量
+r/s
+每秒钟完成的读请求数量
+w/s
+每秒钟完成的写请求数量
+rsec/s
+每秒钟读取的扇区数量
+wsec/s
+每秒钟写入的扇区数量
+avgrq-sz
+平均请求扇区的大小
+avgqu-sz
+平均请求队列的长度
+await
+平均每次请求的等待时间
+util
+设备的利用率
+    下面是关键列的解释：
+    util是设备的利用率。如果它接近100%，通常说明设备能力趋于饱和。
+    await是平均每次请求的等待时间。这个时间包括了队列时间和服务时间，也就是说，一般情况下，await大于svctm，它们的差值越小，则说明队列时间越短，反之差值越大，队列时间越长，说明系统出了问题。
+    avgqu-sz是平均请求队列的长度。毫无疑问，队列长度越短越好。                 
+
+     6.  当前运行进程的实时监控工具(pidstat)：
+     pidstat主要用于监控全部或指定进程占用系统资源的情况，如CPU，内存、设备IO、任务切换、线程等。pidstat首次运行时显示自系统启动开始的各项统计信息，之后运行pidstat将显示自上次运行该命令以后的统计信息。用户可以通过指定统计的次数和时间来获得所需的统计信息。
+    在正常的使用，通常都是通过在命令行选项中指定待监控的pid，之后在通过其他具体的参数来监控与该pid相关系统资源信息。
+选项
+说明
+-l
+显示该进程和CPU相关的信息(command列中可以显示命令的完整路径名和命令的参数)。
+-d
+显示该进程和设备IO相关的信息。
+-r
+显示该进程和内存相关的信息。
+-w
+显示该进程和任务时间片切换相关的信息。
+-t
+显示在该进程内正在运行的线程相关的信息。
+-p
+后面紧跟着带监控的进程id或ALL(表示所有进程)，如不指定该选项，将监控当前系统正在运行的所有进程。
+    #监控pid为1(init)的进程的CPU资源使用情况，其中每隔3秒刷新并输出一次，3次后程序退出。
+    /> pidstat -p 1 2 3 -l
+    07:18:58 AM       PID    %usr %system  %guest    %CPU   CPU  Command
+    07:18:59 AM         1    0.00    0.00    0.00    0.00     0  /sbin/init
+    07:19:00 AM         1    0.00    0.00    0.00    0.00     0  /sbin/init
+    07:19:01 AM         1    0.00    0.00    0.00    0.00     0  /sbin/init
+    Average:               1    0.00    0.00    0.00    0.00     -  /sbin/init
+    %usr：      该进程在用户态的CPU使用率。
+    %system：该进程在内核态(系统级)的CPU使用率。
+    %CPU：     该进程的总CPU使用率，如果在SMP环境下，该值将除以CPU的数量，以表示每CPU的数据。
+    CPU:         该进程所依附的CPU编号(0表示第一个CPU)。
+
+    #监控pid为1(init)的进程的设备IO资源负载情况，其中每隔2秒刷新并输出一次，3次后程序退出。
+    /> pidstat -p 1 2 3 -d    
+    07:24:49 AM       PID   kB_rd/s   kB_wr/s kB_ccwr/s  Command
+    07:24:51 AM         1      0.00      0.00      0.00  init
+    07:24:53 AM         1      0.00      0.00      0.00  init
+    07:24:55 AM         1      0.00      0.00      0.00  init
+    Average:               1      0.00      0.00      0.00  init
+    kB_rd/s:   该进程每秒的字节读取数量(KB)。
+    kB_wr/s:   该进程每秒的字节写出数量(KB)。
+    kB_ccwr/s: 该进程每秒取消磁盘写入的数量(KB)。
+
+    #监控pid为1(init)的进程的内存使用情况，其中每隔2秒刷新并输出一次，3次后程序退出。
+    /> pidstat -p 1 2 3 -r
+    07:29:56 AM       PID  minflt/s  majflt/s     VSZ    RSS   %MEM  Command
+    07:29:58 AM         1      0.00      0.00    2828   1368   0.13  init
+    07:30:00 AM         1      0.00      0.00    2828   1368   0.13  init
+    07:30:02 AM         1      0.00      0.00    2828   1368   0.13  init
+    Average:               1      0.00      0.00    2828   1368   0.13  init
+    %MEM:  该进程的内存使用百分比。
+
+    #监控pid为1(init)的进程任务切换情况，其中每隔2秒刷新并输出一次，3次后程序退出。
+    /> pidstat -p 1 2 3 -w
+    07:32:15 AM       PID   cswch/s nvcswch/s  Command
+    07:32:17 AM         1      0.00      0.00  init
+    07:32:19 AM         1      0.00      0.00  init
+    07:32:21 AM         1      0.00      0.00  init
+    Average:            1      0.00      0.00  init
+    cswch/s:    每秒任务主动(自愿的)切换上下文的次数。主动切换是指当某一任务处于阻塞等待时，将主动让出自己的CPU资源。
+    nvcswch/s: 每秒任务被动(不自愿的)切换上下文的次数。被动切换是指CPU分配给某一任务的时间片已经用完，因此将强迫该进程让出CPU的执行权。
+
+    #监控pid为1(init)的进程及其内部线程的内存(r选项)使用情况，其中每隔2秒刷新并输出一次，3次后程序退出。需要说明的是，如果-t选项后面不加任何其他选项，缺省监控的为CPU资源。结果中黄色高亮的部分表示进程和其内部线程是树状结构的显示方式。
+    /> pidstat -p 1 2 3 -tr
+    Linux 2.6.32-71.el6.i686 (Stephen-PC)   11/16/2011      _i686_  (1 CPU)
+
+    07:37:04 AM      TGID       TID  minflt/s  majflt/s     VSZ    RSS   %MEM  Command
+    07:37:06 AM         1         -      0.00      0.00        2828   1368      0.13  init
+    07:37:06 AM         -         1      0.00      0.00        2828   1368      0.13  |__init
+
+    07:37:06 AM      TGID       TID  minflt/s  majflt/s     VSZ    RSS   %MEM  Command
+    07:37:08 AM         1         -      0.00      0.00        2828   1368      0.13  init
+    07:37:08 AM         -         1      0.00      0.00        2828   1368      0.13  |__init
+
+    07:37:08 AM      TGID       TID  minflt/s  majflt/s     VSZ    RSS   %MEM  Command
+    07:37:10 AM         1         -      0.00      0.00        2828   1368      0.13  init
+    07:37:10 AM         -         1      0.00      0.00        2828   1368      0.13  |__init
+
+    Average:         TGID       TID  minflt/s  majflt/s     VSZ    RSS   %MEM  Command
+    Average:            1         -      0.00      0.00        2828   1368      0.13  init
+    Average:            -         1      0.00      0.00        2828   1368      0.13  |__init
+    TGID: 线程组ID。
+    TID： 线程ID。  
+    以上监控不同资源的选项可以同时存在，这样就将在一次输出中输出多种资源的使用情况，如：pidstat -p 1 -dr。
+
+    7.  报告磁盘空间使用状况(df):
+    该命令最为常用的选项就是-h，该选项将智能的输出数据单位，以便使输出的结果更具可读性。
+    /> df -h
+    Filesystem             Size  Used   Avail Use% Mounted on
+    /dev/sda1             5.8G  3.3G  2.2G  61%   /
+    tmpfs                  504M  260K  504M   1%  /dev/shm
+
+    8.  评估磁盘的使用状况(du)：
+选项
+说明
+-a
+包括了所有的文件，而不只是目录。
+-b
+以字节为计算单位。
+-k
+以千字节(KB)为计算单位。
+-m
+以兆字节(MB)为计算单位。
+-h
+是输出的信息更易于阅读。
+-s
+只显示工作目录所占总空间。
+--exclude=PATTERN
+排除掉符合样式的文件,Pattern就是普通的Shell样式，？表示任何一个字符，*表示任意多个字符。
+--max-depth=N
+从当前目录算起，目录深度大于N的子目录将不被计算，该选项不能和s选项同时存在。 
+
+    #仅显示子一级目录的信息。
+    /> du --max-depth=1 -h
+    246M    ./stephen
+    246M    .    
+    /> du -sh ./*   #获取当前目录下所有子目录所占用的磁盘空间大小。
+    352K    ./MemcachedTest
+    132K    ./Test
+    33M     ./thirdparty    
+    #在当前目录下，排除目录名模式为Te*的子目录(./Test)，输出其他子目录占用的磁盘空间大小。
+    /> du --exclude=Te* -sh ./*  
+    352K    ./MemcachedTest
+    33M     ./thirdparty
