@@ -1,0 +1,259 @@
+十九.  和系统运行进程相关的Shell命令:
+    
+   1.  进程监控命令(ps):
+    要对进程进行监测和控制，首先必须要了解当前进程的情况，也就是需要查看当前进程，而ps命令就是最基本同时也是非常强大的进程查看命令。使用该命令可以确定有哪些进程正在运行和运行的状态、进程是否结束、进程有没有僵死、哪些进程占用了过多的资源等等。总之大部分信息都是可以通过执行该命令得到的。
+    ps命令存在很多的命令行选项和参数，然而我们最为常用只有两种形式，这里先给出与它们相关的选项和参数的含义：
+选项
+说明
+a
+显示终端上的所有进程，包括其他用户的进程。
+u
+以用户为主的格式来显示程序状况。
+x
+显示所有程序，不以终端来区分。
+-e
+显示所有进程。
+o
+其后指定要输出的列，如user，pid等，多个列之间用逗号分隔。
+-p
+后面跟着一组pid的列表，用逗号分隔，该命令将只是输出这些pid的相关数据。
+    /> ps aux
+    root         1  0.0  0.1   2828  1400 ?        Ss   09:51   0:02 /sbin/init
+    root         2  0.0  0.0      0          0 ?        S    09:51   0:00 [kthreadd]
+    root         3  0.0  0.0      0          0 ?        S    09:51   0:00 [migration/0]
+    ... ...   
+    /> ps -eo user,pid,%cpu,%mem,start,time,command | head -n 4
+    USER       PID %CPU %MEM  STARTED     TIME        COMMAND
+    root         1         0.0    0.1   09:51:08     00:00:02  /sbin/init
+    root         2         0.0    0.0   09:51:08     00:00:00  [kthreadd]
+    root         3         0.0    0.0   09:51:08     00:00:00  [migration/0]
+    这里需要说明的是，ps中存在很多和进程性能相关的参数，它们均以输出表格中的列的方式显示出来，在这里我们只是给出了非常常用的几个参数，至于更多参数，我们则需要根据自己应用的实际情况去看ps的man手册。
+    #以完整的格式显示pid为1(init)的进程的相关数据
+    /> ps -fp 1
+    UID        PID  PPID  C STIME TTY          TIME   CMD
+    root         1        0  0 05:16   ?        00:00:03 /sbin/init
+    
+    2.  改变进程优先级的命令(nice和renice):
+    该Shell命令最常用的使用方式为：nice [-n <优先等级>][执行指令]，其中优先等级的范围从-20-19，其中-20最高，19最低，只有系统管理者可以设置负数的等级。
+    #后台执行sleep 100秒，同时在启动时将其nice值置为19
+    /> nice -n 19 sleep 100 &
+    [1] 4661
+    #后台执行sleep 100秒，同时在启动时将其nice值置为-19
+    /> nice -n -19 sleep 100 &
+    [2] 4664
+    #关注ps -l输出中用黄色高亮的两行，它们的NI值和我们执行是设置的值一致。
+    /> ps -l
+    F S   UID   PID  PPID  C PRI  NI  ADDR  SZ    WCHAN  TTY       TIME        CMD
+    4 S     0  2833  2829  0  80   0     -      1739     -         pts/2    00:00:00  bash
+    0 S     0  4661  2833  0  99  19    -      1066     -         pts/2    00:00:00  sleep
+    4 S     0  4664  2833  0  61 -19    -      1066     -         pts/2    00:00:00  sleep
+    4 R     0  4665  2833  1  80   0     -      1231     -         pts/2    00:00:00  ps
+    
+    renice命令主要用于为已经执行的进程重新设定nice值，该命令包含以下几个常用选项：
+选项
+说明
+-g
+使用程序群组名称，修改所有隶属于该程序群组的程序的优先权。
+-p
+改变该程序的优先权等级，此参数为预设值。
+-u
+指定用户名称，修改所有隶属于该用户的程序的优先权。
+    #切换到stephen用户下执行一个后台进程，这里sleep进程将在后台睡眠1000秒。
+    /> su stephen
+    /> sleep 1000&  
+    [1] 4812
+    /> exit   #退回到切换前的root用户
+    #查看已经启动的后台sleep进程，其ni值为0，宿主用户为stephen
+    /> ps -eo user,pid,ni,command | grep stephen
+    stephen   4812   0 sleep 1000
+    root        4821    0 grep  stephen
+    #以指定用户的方式修改该用户下所有进程的nice值
+    /> renice -n 5 -u stephen
+    500: old priority 0, new priority 5
+    #从再次执行ps的输出结果可以看出，该sleep后台进程的nice值已经调成了5
+    /> ps -eo user,pid,ni,command | grep stephen
+    stephen   4812   5 sleep 1000
+    root         4826   0 grep  stephen
+    #以指定进程pid的方式修改该进程的nice值
+    /> renice -n 10 -p 4812
+    4812: old priority 5, new priority 10
+    #再次执行ps，该sleep后台进程的nice值已经从5变成了10
+    /> ps -eo user,pid,ni,command | grep stephen
+    stephen   4812  10 sleep 1000
+    root        4829   0 grep  stephen
+
+    3.  列出当前系统打开文件的工具(lsof):
+    lsof(list opened files)，其重要功能为列举系统中已经被打开的文件，如果没有指定任何选项或参数，lsof则列出所有活动进程打开的所有文件。众所周知，linux环境中任何事物都是文件，如设备、目录、sockets等。所以，用好lsof命令，对日常的linux管理非常有帮助。下面先给出该命令的常用选项：
+选项
+说明
+-a
+该选项会使后面选项选出的结果列表进行and操作。
+-c command_prefix
+显示以command_prefix开头的进程打开的文件。
+-p PID
+显示指定PID已打开文件的信息
++d directory
+从文件夹directory来搜寻(不考虑子目录)，列出该目录下打开的文件信息。
++D directory
+从文件夹directory来搜寻(考虑子目录)，列出该目录下打开的文件信息。
+-d num_of_fd
+以File Descriptor的信息进行匹配，可使用3-10，表示范围，3,10表示某些值。
+-u user
+显示某用户的已经打开的文件，其中user可以使用正则表达式。
+-i
+监听指定的协议、端口、主机等的网络信息，格式为：[proto][@host|addr][:svc_list|port_list]
+    #查看打开/dev/null文件的进程。
+    /> lsof /dev/null | head -n 5
+    COMMAND    PID      USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+    init         1      root    0u   CHR    1,3      0t0 3671 /dev/null
+    init         1      root    1u   CHR    1,3      0t0 3671 /dev/null
+    init         1      root    2u   CHR    1,3      0t0 3671 /dev/null
+    udevd 397      root    0u   CHR    1,3      0t0 3671 /dev/null
+
+    #查看打开22端口的进程
+    /> lsof -i:22
+    COMMAND  PID USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+    sshd    1582 root    3u  IPv4  11989      0t0  TCP *:ssh (LISTEN)
+    sshd    1582 root    4u  IPv6  11991      0t0  TCP *:ssh (LISTEN)
+    sshd    2829 root    3r   IPv4  19635      0t0  TCP bogon:ssh->bogon:15264 (ESTABLISHED)
+
+    #查看init进程打开的文件
+    />  lsof -c init
+    COMMAND PID USER   FD   TYPE     DEVICE   SIZE/OFF   NODE    NAME
+    init               1 root  cwd      DIR        8,2     4096              2        /
+    init               1 root  rtd       DIR        8,2     4096              2        /
+    init               1 root  txt       REG       8,2   136068       148567     /sbin/init
+    init               1 root  mem    REG        8,2    58536      137507     /lib/libnss_files-2.12.so
+    init               1 root  mem    REG        8,2   122232     186675     /lib/libgcc_s-4.4.4-20100726.so.1
+    init               1 root  mem    REG        8,2   141492     186436     /lib/ld-2.12.so
+    init               1 root  mem    REG        8,2  1855584    186631     /lib/libc-2.12.so
+    init               1 root  mem    REG        8,2   133136     186632     /lib/libpthread-2.12.so
+    init               1 root  mem    REG        8,2    99020      180422     /lib/libnih.so.1.0.0
+    init               1 root  mem    REG        8,2    37304      186773     /lib/libnih-dbus.so.1.0.0
+    init               1 root  mem    REG        8,2    41728      186633     /lib/librt-2.12.so
+    init               1 root  mem    REG        8,2   286380     186634     /lib/libdbus-1.so.3.4.0
+    init               1 root    0u     CHR        1,3      0t0           3671      /dev/null
+    init               1 root    1u     CHR        1,3      0t0           3671      /dev/null
+    init               1 root    2u     CHR        1,3      0t0           3671      /dev/null
+    init               1 root    3r      FIFO       0,8      0t0           7969      pipe
+    init               1 root    4w     FIFO       0,8      0t0           7969      pipe
+    init               1 root    5r      DIR        0,10        0             1         inotify
+    init               1 root    6r      DIR        0,10        0             1         inotify
+    init               1 root    7u     unix   0xf61e3840  0t0       7970      socket
+    init               1 root    9u     unix   0xf3bab280  0t0      11211     socket
+    在上面输出的FD列中，显示的是文件的File Descriptor number，或者如下的内容：
+    cwd:  current working directory;
+    mem:  memory-mapped file;
+    mmap: memory-mapped device;
+    pd:   parent directory;
+    rtd:  root directory;
+    txt:  program text (code and data);
+    文件的File Descriptor number显示模式有:
+    r for read access;
+    w for write access;
+    u for read and write access;
+
+    在上面输出的TYPE列中，显示的是文件类型，如：
+    DIR:  目录
+    LINK: 链接文件
+    REG:  普通文件
+
+    #查看pid为1的进程(init)打开的文件，其输出结果等同于上面的命令，他们都是init。
+    /> lsof -p 1
+    #查看owner为root的进程打开的文件。
+    /> lsof -u root
+    #查看owner不为root的进程打开的文件。
+    /> lsof -u ^root
+    #查看打开协议为tcp，ip为192.168.220.134，端口为22的进程。
+    /> lsof -i tcp@192.168.220.134:22
+    COMMAND  PID USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+    sshd        2829 root     3r    IPv4  19635      0t0      TCP    bogon:ssh->bogon:15264 (ESTABLISHED)    
+    #查看打开/root文件夹，但不考虑目录搜寻
+    /> lsof +d /root
+    #查看打开/root文件夹以及其子目录搜寻
+    /> lsof +D /root
+    #查看打开FD(0-3)文件的所有进程
+    /> lsof -d 0-3
+    #-a选项会将+d选项和-c选项的选择结果进行and操作，并输出合并后的结果。
+    /> lsof +d .
+    COMMAND  PID USER   FD   TYPE DEVICE SIZE/OFF  NODE NAME
+    bash       9707  root  cwd    DIR    8,1     4096         39887 .
+    lsof         9791  root  cwd    DIR    8,1     4096         39887 .
+    lsof         9792  root  cwd    DIR    8,1     4096         39887 .
+    /> lsof -a -c bash +d .
+    COMMAND  PID USER   FD   TYPE DEVICE SIZE/OFF  NODE NAME
+    bash        9707 root  cwd    DIR    8,1     4096         39887 .
+    最后需要额外说明的是，如果在文件名的末尾存在(delete)，则说明该文件已经被删除，只是还存留在cache中。
+
+    4.  进程查找/杀掉命令(pgrep/pkill)：
+    查找和杀死指定的进程, 他们的选项和参数完全相同, 这里只是介绍pgrep。下面是常用的命令行选项：
+选项
+说明
+-d
+定义多个进程之间的分隔符, 如果不定义则使用换行符。
+-n
+表示如果该程序有多个进程正在运行，则仅查找最新的，即最后启动的。
+-o
+表示如果该程序有多个进程正在运行，则仅查找最老的，即最先启动的。
+-G
+其后跟着一组group id，该命令在搜索时，仅考虑group列表中的进程。
+-u
+其后跟着一组有效用户ID(effetive user id)，该命令在搜索时，仅考虑该effective user列表中的进程。
+-U
+其后跟着一组实际用户ID(real user id)，该命令在搜索时，仅考虑该real user列表中的进程。
+-x
+表示进程的名字必须完全匹配, 以上的选项均可以部分匹配。
+-l
+将不仅打印pid,也打印进程名。
+-f
+一般与-l合用, 将打印进程的参数。
+    #手工创建两个后台进程
+    /> sleep 1000&
+    3456
+    /> sleep 1000&
+    3457
+
+    #查找进程名为sleep的进程，同时输出所有找到的pid
+    /> pgrep sleep
+    3456
+    3457
+    #查找进程名为sleep的进程pid，如果存在多个，他们之间使用:分隔，而不是换行符分隔。
+    /> pgrep -d: sleep
+    3456:3457
+    #查找进程名为sleep的进程pid，如果存在多个，这里只是输出最后启动的那一个。
+    /> pgrep -n sleep
+    3457
+    #查找进程名为sleep的进程pid，如果存在多个，这里只是输出最先启动的那一个。
+    /> pgrep -o  sleep
+    3456
+    #查找进程名为sleep，同时这个正在运行的进程的组为root和stephen。
+    /> pgrep -G root,stephen sleep
+    3456
+    3457
+    #查找有效用户ID为root和oracle，进程名为sleep的进程。
+    /> pgrep -u root,oracle sleep
+    3456
+    3457
+    #查找实际用户ID为root和oracle，进程名为sleep的进程。
+    /> pgrep -U root,oracle sleep
+    3456
+    3457
+    #查找进程名为sleep的进程，注意这里找到的进程名必须和参数中的完全匹配。
+    /> pgrep -x sleep
+    3456
+    3457
+    #-x不支持部分匹配，sleep进程将不会被查出，因此下面的命令没有结果。
+    /> pgrep -x sle
+    #查找进程名为sleep的进程，同时输出所有找到的pid和进程名。    
+    /> pgrep -l sleep
+    3456 sleep
+    3457 sleep
+    #查找进程名为sleep的进程，同时输出所有找到的pid、进程名和启动时的参数。
+    /> pgrep -lf sleep
+    3456 sleep 1000
+    3457 sleep 1000
+    #查找进程名为sleep的进程，同时以逗号为分隔符输出他们的pid，在将结果传给ps命令，-f表示显示完整格式，-p显示pid列表，ps将只是输出该列表内的进程数据。
+    /> pgrep -f sleep -d, | xargs ps -fp
+    UID        PID  PPID  C STIME TTY          TIME CMD
+    root      3456  2138  0 06:11 pts/5    00:00:00 sleep 1000
+    root      3457  2138  0 06:11 pts/5    00:00:00 sleep 1000  
