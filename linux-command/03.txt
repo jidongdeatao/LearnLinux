@@ -1,0 +1,286 @@
+八.　流编辑器sed:
+
+    sed一次处理一行文件并把输出送往屏幕。sed把当前处理的行存储在临时缓冲区中，称为模式空间(pattern space)。一旦sed完成对模式空间中的行的处理，模式空间中的行就被送往屏幕。行被处理完成之后，就被移出模式空间，程序接着读入下一行，处理，显示，移出......文件输入的最后一行被处理完以后sed结束。通过存储每一行在临时缓冲区，然后在缓冲区中操作该行，保证了原始文件不会被破坏。
+    
+    1.  sed的命令和选项：
+命令
+功能描述
+a\
+ 在当前行的后面加入一行或者文本。
+c\
+ 用新的文本改变或者替代本行的文本。
+d
+ 从pattern space位置删除行。
+i\
+ 在当前行的上面插入文本。
+h
+ 拷贝pattern space的内容到holding buffer(特殊缓冲区)。
+H
+ 追加pattern space的内容到holding buffer。
+g
+ 获得holding buffer中的内容，并替代当前pattern space中的文本。
+G
+ 获得holding buffer中的内容，并追加到当前pattern space的后面。
+n
+ 读取下一个输入行，用下一个命令处理新的行而不是用第一个命令。
+p
+ 打印pattern space中的行。
+P
+ 打印pattern space中的第一行。
+q
+ 退出sed。
+w file
+ 写并追加pattern space到file的末尾。
+!
+ 表示后面的命令对所有没有被选定的行发生作用。
+s/re/string
+ 用string替换正则表达式re。
+=
+ 打印当前行号码。
+替换标记
+ 
+g
+ 行内全面替换，如果没有g，只替换第一个匹配。
+p
+ 打印行。
+x
+ 互换pattern space和holding buffer中的文本。
+y
+ 把一个字符翻译为另一个字符(但是不能用于正则表达式)。
+选项
+ 
+-e
+ 允许多点编辑。
+-n
+ 取消默认输出。
+     需要说明的是，sed中的正则和grep的基本相同，完全可以参照本系列的第一篇中的详细说明。
+
+   2.  sed实例：
+    /> cat testfile
+    northwest       NW     Charles Main           3.0      .98      3       34
+    western          WE      Sharon Gray           5.3      .97     5       23
+    southwest       SW     Lewis Dalsass          2.7      .8      2       18
+    southern         SO      Suan Chin               5.1     .95     4       15
+    southeast       SE       Patricia Hemenway   4.0      .7      4       17
+    eastern           EA      TB Savage               4.4     .84     5       20
+    northeast        NE      AM Main Jr.              5.1     .94     3       13
+    north              NO      Margot Weber         4.5     .89     5       9
+    central            CT      Ann Stephens          5.7     .94     5       13
+
+    /> sed '/north/p' testfile #如果模板north被找到，sed除了打印所有行之外，还有打印匹配行。
+    northwest       NW      Charles Main           3.0     .98     3       34
+    northwest       NW      Charles Main           3.0     .98     3       34
+    western          WE      Sharon Gray           5.3     .97     5       23
+    southwest      SW      Lewis Dalsass          2.7     .8       2       18
+    southern        SO       Suan Chin               5.1     .95     4       15
+    southeast       SE       Patricia Hemenway   4.0     .7       4       17
+    eastern           EA      TB Savage               4.4     .84     5       20
+    northeast        NE      AM Main Jr.              5.1     .94     3       13
+    northeast        NE      AM Main Jr.              5.1     .94     3       13
+    north              NO      Margot Weber         4.5     .89     5       9
+    north              NO      Margot Weber         4.5     .89     5       9
+    central            CT      Ann Stephens          5.7     .94     5       13
+
+    #-n选项取消了sed的默认行为。在没有-n的时候，包含模板的行被打印两次，但是在使用-n的时候将只打印包含模板的行。
+    /> sed -n '/north/p' testfile
+    northwest       NW      Charles Main    3.0     .98     3       34
+    northeast        NE      AM Main Jr.       5.1     .94     3       13
+    north              NO      Margot Weber  4.5     .89     5       9
+
+    /> sed '3d' testfile  #第三行被删除，其他行默认输出到屏幕。
+    northwest       NW     Charles Main            3.0     .98     3       34
+    western          WE      Sharon Gray           5.3     .97     5       23
+    southern         SO      Suan Chin               5.1     .95     4       15
+    southeast       SE       Patricia Hemenway   4.0     .7       4       17
+    eastern           EA      TB Savage               4.4     .84     5       20
+    northeast       NE       AM Main Jr.              5.1     .94     3       13
+    north             NO       Margot Weber         4.5     .89     5       9
+    central           CT       Ann Stephens          5.7     .94     5       13
+
+    /> sed '3,$d' testfile  #从第三行删除到最后一行，其他行被打印。$表示最后一行。
+    northwest       NW      Charles Main    3.0     .98     3       34
+    western          WE      Sharon Gray    5.3     .97     5       23
+
+    /> sed '$d' testfile    #删除最后一行，其他行打印。
+    northwest       NW     Charles Main           3.0     .98     3       34
+    western          WE     Sharon Gray           5.3     .97     5       23
+    southwest       SW    Lewis Dalsass          2.7     .8      2       18
+    southern         SO     Suan Chin              5.1     .95     4       15
+    southeast       SE      Patricia Hemenway   4.0     .7      4       17
+    eastern           EA      TB Savage             4.4     .84     5       20
+    northeast       NE      AM Main Jr.             5.1     .94     3       13
+    north             NO      Margot Weber        4.5     .89     5       9
+
+    /> sed '/north/d' testfile #删除所有包含north的行，其他行打印。
+    western           WE      Sharon Gray           5.3     .97     5       23
+    southwest       SW      Lewis Dalsass          2.7     .8      2       18
+    southern          SO      Suan Chin               5.1     .95     4       15
+    southeast         SE      Patricia Hemenway   4.0     .7       4       17
+    eastern            EA      TB Savage               4.4     .84     5       20
+    central             CT      Ann Stephens          5.7     .94     5       13
+
+    #s表示替换，g表示命令作用于整个当前行。如果该行存在多个west，都将被替换为north，如果没有g，则只是替换第一个匹配。
+    /> sed 's/west/north/g' testfile
+    northnorth      NW     Charles Main           3.0     .98    3       34
+    northern         WE      Sharon Gray          5.3     .97    5       23
+    southnorth      SW     Lewis Dalsass         2.7     .8      2       18
+    southern         SO      Suan Chin              5.1     .95    4       15
+    southeast       SE      Patricia Hemenway   4.0     .7      4       17
+    eastern           EA      TB Savage             4.4     .84     5       20
+    northeast       NE      AM Main Jr.              5.1     .94    3       13
+    north             NO      Margot Weber        4.5     .89     5       9
+    central            CT      Ann Stephens        5.7     .94     5       13
+
+    /> sed -n 's/^west/north/p' testfile #-n表示只打印匹配行，如果某一行的开头是west，则替换为north。
+    northern        WE      Sharon Gray     5.3     .97     5       23
+
+    #&符号表示替换字符串中被找到的部分。所有以两个数字结束的行，最后的数字都将被它们自己替换，同时追加.5。
+    /> sed 's/[0-9][0-9]$/&.5/' testfile
+    northwest       NW      Charles Main          3.0     .98     3       34.5
+    western          WE      Sharon Gray           5.3     .97     5       23.5
+    southwest       SW      Lewis Dalsass        2.7     .8       2       18.5
+    southern         SO      Suan Chin              5.1     .95     4       15.5
+    southeast       SE      Patricia Hemenway   4.0     .7       4       17.5
+    eastern           EA      TB Savage              4.4     .84     5       20.5
+    northeast        NE      AM Main Jr.             5.1     .94     3       13.5
+    north              NO      Margot Weber        4.5     .89     5       9
+    central            CT      Ann Stephens         5.7     .94     5       13.5
+
+    /> sed -n 's/Hemenway/Jones/gp' testfile  #所有的Hemenway被替换为Jones。-n选项加p命令则表示只打印匹配行。
+    southeast       SE      Patricia Jones  4.0     .7      4       17
+
+    #模板Mar被包含在一对括号中，并在特殊的寄存器中保存为tag 1，它将在后面作为\1替换字符串，Margot被替换为Marlianne。
+    /> sed -n 's/\(Mar\)got/\1lianne/p' testfile
+    north           NO      Marlianne Weber 4.5     .89     5       9
+
+    #s后面的字符一定是分隔搜索字符串和替换字符串的分隔符，默认为斜杠，但是在s命令使用的情况下可以改变。不论什么字符紧跟着s命令都认为是新的分隔符。这个技术在搜索含斜杠的模板时非常有用，例如搜索时间和路径的时候。
+    /> sed 's#3#88#g' testfile
+    northwest       NW      Charles Main            88.0    .98     88     884
+    western          WE       Sharon Gray           5.88    .97     5       288
+    southwest       SW      Lewis Dalsass          2.7     .8       2       18
+    southern         SO       Suan Chin               5.1     .95     4       15
+    southeast       SE        Patricia Hemenway   4.0     .7        4       17
+    eastern           EA       TB Savage               4.4     .84      5      20
+    northeast        NE       AM Main Jr.              5.1     .94      88     188
+    north              NO       Margot Weber         4.5     .89      5       9
+    central            CT       Ann Stephens          5.7     .94      5       188
+
+    #所有在模板west和east所确定的范围内的行都被打印，如果west出现在esst后面的行中，从west开始到下一个east，无论这个east出现在哪里，二者之间的行都被打印，即使从west开始到文件的末尾还没有出现east，那么从west到末尾的所有行都将打印。
+    /> sed -n '/west/,/east/p' testfile
+    northwest       NW      Charles Main           3.0     .98      3      34
+    western          WE      Sharon Gray            5.3     .97     5      23
+    southwest       SW     Lewis Dalsass          2.7     .8       2      18
+    southern         SO      Suan Chin               5.1     .95     4      15
+    southeast        SE      Patricia Hemenway    4.0     .7       4      17
+
+    /> sed -n '5,/^northeast/p' testfile  #打印从第五行开始到第一个以northeast开头的行之间的所有行。
+    southeast       SE      Patricia Hemenway   4.0     .7       4       17
+    eastern           EA      TB Savage              4.4     .84     5       20
+    northeast        NE      AM Main Jr.             5.1     .94     3       13
+
+    #-e选项表示多点编辑。第一个编辑命令是删除第一到第三行。第二个编辑命令是用Jones替换Hemenway。
+    /> sed -e '1,3d' -e 's/Hemenway/Jones/' testfile
+    southern        SO      Suan Chin          5.1     .95     4       15
+    southeast       SE      Patricia Jones      4.0     .7      4       17
+    eastern          EA      TB Savage          4.4     .84     5       20
+    northeast       NE      AM Main Jr.         5.1     .94     3       13
+    north             NO      Margot Weber    4.5     .89     5       9
+    central           CT      Ann Stephens     5.7     .94     5       13
+
+    /> sed -n '/north/w newfile' testfile #将所有匹配含有north的行写入newfile中。
+    /> cat newfile
+    northwest       NW      Charles Main     3.0     .98     3       34
+    northeast       NE      AM Main Jr.         5.1     .94     3       13
+    north             NO      Margot Weber    4.5     .89     5       9
+
+    /> sed '/eastern/i\ NEW ENGLAND REGION' testfile #i是插入命令，在匹配模式行前插入文本。
+    northwest       NW      Charles Main          3.0     .98      3       34
+    western          WE      Sharon Gray           5.3     .97     5       23
+    southwest       SW      Lewis Dalsass         2.7     .8      2       18
+    southern         SO      Suan Chin              5.1     .95     4       15
+    southeast        SE      Patricia Hemenway   4.0     .7      4       17
+    NEW ENGLAND REGION
+    eastern          EA      TB Savage              4.4     .84     5       20
+    northeast       NE      AM Main Jr.             5.1     .94     3       13
+    north             NO      Margot Weber        4.5     .89     5       9
+    central           CT      Ann Stephens         5.7     .94     5       13
+
+    #找到匹配模式eastern的行后，执行后面花括号中的一组命令，每个命令之间用逗号分隔，n表示定位到匹配行的下一行，s/AM/Archie/完成Archie到AM的替换，p和-n选项的合用，则只是打印作用到的行。
+    /> sed -n '/eastern/{n;s/AM/Archie/;p}' testfile
+    northeast       NE      Archie Main Jr. 5.1     .94     3       13
+
+    #-e表示多点编辑，第一个编辑命令y将前三行中的所有小写字母替换为大写字母，-n表示不显示替换后的输出，第二个编辑命令将只是打印输出转换后的前三行。注意y不能用于正则。
+    /> sed -n -e '1,3y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/' -e '1,3p' testfile
+    NORTHWEST       NW      CHARLES MAIN     3.0     .98     3       34
+    WESTERN           WE      SHARON GRAY      5.3     .97     5       23
+    SOUTHWEST       SW      LEWIS DALSASS   2.7     .8      2       18
+
+    /> sed '2q' testfile  #打印完第二行后退出。
+    northwest       NW      Charles Main    3.0     .98     3       34
+    western          WE      Sharon Gray     5.3     .97     5       23
+
+    #当模板Lewis在某一行被匹配，替换命令首先将Lewis替换为Joseph，然后再用q退出sed。
+     /> sed '/Lewis/{s/Lewis/Joseph/;q;}' testfile
+    northwest       NW      Charles Main      3.0     .98     3       34
+    western          WE      Sharon Gray      5.3     .97     5       23
+    southwest       SW      Joseph Dalsass  2.7     .8      2       18
+
+    #在sed处理文件的时候，每一行都被保存在pattern space的临时缓冲区中。除非行被删除或者输出被取消，否则所有被处理过的行都将打印在屏幕上。接着pattern space被清空，并存入新的一行等待处理。在下面的例子中，包含模板的northeast行被找到，并被放入pattern space中，h命令将其复制并存入一个称为holding buffer的特殊缓冲区内。在第二个sed编辑命令中，当达到最后一行后，G命令告诉sed从holding buffer中取得该行，然后把它放回到pattern space中，且追加到现在已经存在于模式空间的行的末尾。
+     /> sed -e '/northeast/h' -e '$G' testfile
+    northwest       NW     Charles Main            3.0    .98     3       34
+    western          WE     Sharon Gray            5.3    .97     5       23
+    southwest       SW    Lewis Dalsass          2.7     .8       2       18
+    southern         SO     Suan Chin               5.1     .95     4       15
+    southeast       SE      Patricia Hemenway   4.0     .7       4       17
+    eastern           EA      TB Savage              4.4     .84     5       20
+    northeast       NE      AM Main Jr.              5.1     .94     3       13
+    north             NO      Margot Weber         4.5     .89     5       9
+    central           CT      Ann Stephens          5.7     .94     5       13
+    northeast       NE      AM Main Jr.              5.1     .94     3       13
+
+    #如果模板WE在某一行被匹配，h命令将使得该行从pattern space中复制到holding buffer中，d命令在将该行删除，因此WE匹配行没有在原来的位置被输出。第二个命令搜索CT，一旦被找到，G命令将从holding buffer中取回行，并追加到当前pattern space的行末尾。简单的说，WE所在的行被移动并追加到包含CT行的后面。
+    /> sed -e '/WE/{h;d;}' -e '/CT/{G;}' testfile
+    northwest       NW    Charles Main           3.0     .98     3       34
+    southwest       SW    Lewis Dalsass         2.7     .8      2       18
+    southern         SO     Suan Chin              5.1     .95     4       15
+    southeast       SE      Patricia Hemenway   4.0     .7      4       17
+    eastern           EA     TB Savage              4.4     .84     5       20
+    northeast       NE      AM Main Jr.              5.1     .94     3       13
+    north             NO      Margot Weber         4.5     .89     5       9
+    central           CT      Ann Stephens          5.7     .94     5       13
+    western         WE      Sharon Gray           5.3     .97     5       23
+
+    #第一个命令将匹配northeast的行从pattern space复制到holding buffer，第二个命令在读取的文件的末尾时，g命令告诉sed从holding buffer中取得行，并把它放回到pattern space中，以替换已经存在于pattern space中的。简单说就是包含模板northeast的行被复制并覆盖了文件的末尾行。
+    /> sed -e '/northeast/h' -e '$g' testfile
+    northwest       NW     Charles Main          3.0     .98     3       34
+    western          WE      Sharon Gray         5.3     .97      5       23
+    southwest       SW     Lewis Dalsass        2.7     .8       2       18
+    southern         SO      Suan Chin             5.1     .95     4       15
+    southeast       SE      Patricia Hemenway   4.0     .7      4       17
+    eastern           EA      TB Savage             4.4     .84     5       20
+    northeast       NE      AM Main Jr.             5.1     .94     3       13
+    north             NO      Margot Weber        4.5     .89     5       9
+    northeast       NE      AM Main Jr.             5.1     .94     3       13
+
+    #模板WE匹配的行被h命令复制到holding buffer，再被d命令删除。结果可以看出WE的原有位置没有输出。第二个编辑命令将找到匹配CT的行，g命令将取得holding buffer中的行，并覆盖当前pattern space中的行，即匹配CT的行。简单的说，任何包含模板northeast的行都将被复制，并覆盖包含CT的行。    
+    /> sed -e '/WE/{h;d;}' -e '/CT/{g;}' testfile
+    northwest       NW    Charles Main           3.0     .98      3      34
+    southwest       SW    Lewis Dalsass         2.7     .8       2       18
+    southern         SO     Suan Chin              5.1     .95      4      15
+    southeast       SE      Patricia Hemenway   4.0     .7       4      17
+    eastern          EA      TB Savage              4.4     .84      5      20
+    northeast       NE      AM Main Jr.              5.1     .94     3      13
+    north             NO      Margot Weber        4.5     .89      5      9
+    western         WE      Sharon Gray           5.3     .97     5      23
+
+    #第一个编辑中的h命令将匹配Patricia的行复制到holding buffer中，第二个编辑中的x命令，会将holding buffer中的文本考虑到pattern space中，而pattern space中的文本被复制到holding buffer中。因此在打印匹配Margot行的地方打印了holding buffer中的文本，即第一个命令中匹配Patricia的行文本，第三个编辑命令会将交互后的holding buffer中的文本在最后一行的后面打印出来。
+     /> sed -e '/Patricia/h' -e '/Margot/x' -e '$G' testfile
+    northwest       NW      Charles Main           3.0      .98      3       34
+    western           WE      Sharon Gray           5.3     .97      5       23
+    southwest       SW      Lewis Dalsass         2.7      .8       2       18
+    southern         SO      Suan Chin               5.1      .95     4       15
+    southeast       SE       Patricia Hemenway    4.0      .7       4       17
+    eastern           EA      TB Savage               4.4      .84     5       20
+    northeast       NE       AM Main Jr.               5.1     .94      3       13
+    southeast       SE      Patricia Hemenway      4.0     .7       4       17
+    central            CT      Ann Stephens            5.7     .94     5       13
