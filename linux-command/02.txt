@@ -1,15 +1,17 @@
+目录；
+grep、egrep与正则表达式的配合用法
+
 七.　grep家族:
-    
    1.  grep退出状态：
     0: 表示成功；
     1: 表示在所提供的文件无法找到匹配的pattern；
     2: 表示参数中提供的文件不存在。
     见如下示例：
     /> grep 'root' /etc/passwd
-    root:x:0:0:root:/root:/bin/bash
-    operator:x:11:0:operator:/root:/sbin/nologin
+        root:x:0:0:root:/root:/bin/bash
+        operator:x:11:0:operator:/root:/sbin/nologin
     /> echo $?
-    0
+     0
     
     /> grep 'root1' /etc/passwd  #用户root1并不存在
     /> echo $?
@@ -23,25 +25,25 @@
    2.  grep中应用正则表达式的实例：
     需要说明的是下面所涉及的正则表达式在上一篇中已经给出了详细的说明，因此在看下面例子的时候，可以与前一篇的正则说明部分结合着看。
     /> cat testfile
-    northwest        NW      Charles Main           3.0     .98     3       34
-    western           WE       Sharon Gray          5.3     .97     5       23
-    southwest       SW       Lewis Dalsass         2.7     .8       2       18
-    southern         SO       Suan Chin               5.1     .95     4       15
-    southeast       SE        Patricia Hemenway    4.0     .7       4       17
-    eastern           EA        TB Savage              4.4     .84     5       20
-    northeast        NE        AM Main Jr.              5.1     .94     3       13
-    north              NO       Margot Weber          4.5     .89     5       9
-    central            CT        Ann Stephens          5.7     .94     5       13
+        northwest        NW      Charles Main           3.0     .98     3       34
+        western           WE       Sharon Gray          5.3     .97     5       23
+        southwest       SW       Lewis Dalsass         2.7     .8       2       18
+        southern         SO       Suan Chin               5.1     .95     4       15
+        southeast       SE        Patricia Hemenway    4.0     .7       4       17
+        eastern           EA        TB Savage              4.4     .84     5       20
+        northeast        NE        AM Main Jr.              5.1     .94     3       13
+        north              NO       Margot Weber          4.5     .89     5       9
+        central            CT        Ann Stephens          5.7     .94     5       13
 
     
     /> grep NW testfile     #打印出testfile中所有包含NW的行。
-    northwest       NW      Charles Main        3.0     .98     3       34
+        northwest       NW      Charles Main        3.0     .98     3       34
     
     /> grep '^n' testfile   #打印出以n开头的行。
-    northwest       NW      Charles Main        3.0     .98     3       34
-    northeast        NE       AM Main Jr.          5.1     .94     3       13
-    north              NO      Margot Weber      4.5     .89     5       9
-    
+        northwest       NW      Charles Main        3.0     .98     3       34
+        northeast        NE       AM Main Jr.          5.1     .94     3       13
+        north              NO      Margot Weber      4.5     .89     5       9
+
     /> grep '4$' testfile   #打印出以4结尾的行。
     northwest       NW      Charles Main        3.0     .98     3       34
     
@@ -149,68 +151,68 @@
    
     4.  grep选项：
     这里先列出grep常用的命令行选项：
-选项
-说明
--c
-只显示有多少行匹配，而不具体显示匹配的行。
--h
-不显示文件名。
--i
-在字符串比较的时候忽略大小写。
--l
-只显示包含匹配模板的行的文件名清单。
--L
-只显示不包含匹配模板的行的文件名清单。
--n
-在每一行前面打印改行在文件中的行数。
--v
-反向检索，只显示不匹配的行。
--w
-只显示完整单词的匹配。
--x
-只显示完整行的匹配。
--r/-R
-如果文件参数是目录，该选项将递归搜索该目录下的所有子目录和文件。
-    /> grep -n '^south' testfile  #-n选项在每一个匹配行的前面打印行号。
-    3:southwest     SW      Lewis Dalsass         2.7     .8      2       18
-    4:southern       SO      Suan Chin               5.1     .95     4       15
-    5:southeast      SE      Patricia Hemenway    4.0     .7      4       17
+        选项
+        说明
+        -c
+        只显示有多少行匹配，而不具体显示匹配的行。
+        -h
+        不显示文件名。
+        -i
+        在字符串比较的时候忽略大小写。
+        -l
+        只显示包含匹配模板的行的文件名清单。
+        -L
+        只显示不包含匹配模板的行的文件名清单。
+        -n
+        在每一行前面打印改行在文件中的行数。
+        -v
+        反向检索，只显示不匹配的行。
+        -w
+        只显示完整单词的匹配。
+        -x
+        只显示完整行的匹配。
+        -r/-R
+        如果文件参数是目录，该选项将递归搜索该目录下的所有子目录和文件。
+        /> grep -n '^south' testfile  #-n选项在每一个匹配行的前面打印行号。
+            3:southwest     SW      Lewis Dalsass         2.7     .8      2       18
+            4:southern       SO      Suan Chin               5.1     .95     4       15
+            5:southeast      SE      Patricia Hemenway    4.0     .7      4       17
 
-    /> grep -i 'pat' testfile     #-i选项关闭了大小写敏感。
-    southeast       SE      Patricia Hemenway       4.0     .7      4       17
+        /> grep -i 'pat' testfile     #-i选项关闭了大小写敏感。
+        southeast       SE      Patricia Hemenway       4.0     .7      4       17
 
-    /> grep -v 'Suan Chin' testfile #打印所有不包含Suan Chin的行。
-    northwest       NW      Charles Main          3.0     .98     3       34
-    western          WE      Sharon Gray           5.3     .97    5       23
-    southwest       SW      Lewis Dalsass        2.7     .8      2       18
-    southeast        SE      Patricia Hemenway   4.0     .7      4       17
-    eastern           EA      TB Savage              4.4     .84     5       20
-    northeast        NE      AM Main Jr.             5.1     .94     3       13
-    north              NO      Margot Weber        4.5     .89     5       9
-    central            CT      Ann Stephens         5.7     .94     5       13
+        /> grep -v 'Suan Chin' testfile #打印所有不包含Suan Chin的行。
+        northwest       NW      Charles Main          3.0     .98     3       34
+        western          WE      Sharon Gray           5.3     .97    5       23
+        southwest       SW      Lewis Dalsass        2.7     .8      2       18
+        southeast        SE      Patricia Hemenway   4.0     .7      4       17
+        eastern           EA      TB Savage              4.4     .84     5       20
+        northeast        NE      AM Main Jr.             5.1     .94     3       13
+        north              NO      Margot Weber        4.5     .89     5       9
+        central            CT      Ann Stephens         5.7     .94     5       13
 
-    /> grep -l 'ss' testfile  #-l使得grep只打印匹配的文件名，而不打印匹配的行。
-    testfile
+        /> grep -l 'ss' testfile  #-l使得grep只打印匹配的文件名，而不打印匹配的行。
+        testfile
 
-    /> grep -c 'west' testfile #-c使得grep只打印有多少匹配模板的行。
-    3
+        /> grep -c 'west' testfile #-c使得grep只打印有多少匹配模板的行。
+        3
 
-    /> grep -w 'north' testfile #-w只打印整个单词匹配的行。
-    north           NO      Margot Weber    4.5     .89     5       9
+        /> grep -w 'north' testfile #-w只打印整个单词匹配的行。
+        north           NO      Margot Weber    4.5     .89     5       9
 
-    /> grep -C 2 Patricia testfile #打印匹配行及其上下各两行。
-    southwest      SW     Lewis Dalsass         2.7     .8       2       18
-    southern        SO      Suan Chin              5.1     .95     4       15
-    southeast       SE      Patricia Hemenway   4.0     .7      4       17
-    eastern          EA      TB Savage              4.4     .84     5       20
-    northeast       NE      AM Main Jr.             5.1     .94     3       13
+        /> grep -C 2 Patricia testfile #打印匹配行及其上下各两行。
+        southwest      SW     Lewis Dalsass         2.7     .8       2       18
+        southern        SO      Suan Chin              5.1     .95     4       15
+        southeast       SE      Patricia Hemenway   4.0     .7      4       17
+        eastern          EA      TB Savage              4.4     .84     5       20
+        northeast       NE      AM Main Jr.             5.1     .94     3       13
 
-    /> grep -B 2 Patricia testfile #打印匹配行及其前两行。
-    southwest      SW      Lewis Dalsass         2.7     .8      2       18
-    southern        SO      Suan Chin               5.1     .95    4       15
-    southeast       SE      Patricia Hemenway   4.0     .7      4       17
+        /> grep -B 2 Patricia testfile #打印匹配行及其前两行。
+        southwest      SW      Lewis Dalsass         2.7     .8      2       18
+        southern        SO      Suan Chin               5.1     .95    4       15
+        southeast       SE      Patricia Hemenway   4.0     .7      4       17
 
-    /> grep -A 2 Patricia testfile #打印匹配行及其后两行。
-    southeast       SE      Patricia Hemenway   4.0     .7      4       17
-    eastern           EA      TB Savage              4.4     .84     5       20
-    northeast       NE       AM Main Jr.             5.1     .94     3       13
+        /> grep -A 2 Patricia testfile #打印匹配行及其后两行。
+        southeast       SE      Patricia Hemenway   4.0     .7      4       17
+        eastern           EA      TB Savage              4.4     .84     5       20
+        northeast       NE       AM Main Jr.             5.1     .94     3       13
