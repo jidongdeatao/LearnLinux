@@ -2,34 +2,34 @@
 
     1.  用set命令设置bash的选项:
     下面为set主要选项的列表及其表述：
-选项名
-开关缩写
-描述
-allexport
--a
-打开此开关，所有变量都自动输出给子Shell。
-noclobber
--C
-防止重定向时文件被覆盖。
-noglob
--d
-在路径和文件名中，关闭通配符。
+        选项名
+        开关缩写
+        描述
+        allexport
+        -a
+        打开此开关，所有变量都自动输出给子Shell。
+        noclobber
+        -C
+        防止重定向时文件被覆盖。
+        noglob
+        -d
+        在路径和文件名中，关闭通配符。
 
-    #打开该选项
-    /> set -o allexport   #等同于set -a
-    #关闭该选项
-    /> set +o allexport  #等同于set +a
-    #列出当前所有选项的当前值。
-    /> set -o
-    allexport         off
-    braceexpand   on
-    emacs             on
-    errexit            off
-    errtrace          off
-    functrace        off
-    hashall            on
-    histexpand      on
-    ... ...
+        #打开该选项
+        /> set -o allexport   #等同于set -a
+        #关闭该选项
+        /> set +o allexport  #等同于set +a
+        #列出当前所有选项的当前值。
+        /> set -o
+        allexport         off
+        braceexpand   on
+        emacs             on
+        errexit            off
+        errtrace          off
+        functrace        off
+        hashall            on
+        histexpand      on
+        ... ...
     /> set -o noclobber     #打开noclobber选项，防止在重定向时原有文件被覆盖。
     /> date > outfile         #通过date命令先生成一个文件outfile。
     /> ls > outfile             #将ls命令的输出重定向到该文件outfile，shell将提示不能覆盖已经存在的文件。
@@ -67,35 +67,35 @@ noglob
     peter
 
     下面的列表将给出常用的内置Shell环境变量:
-变量名
-含义
-BASH
-表示bash命令的完整路径名。
-ENV
-在启动新bash shell时执行的环境文件名。
-HOME
-主目录。
-LANG
-本地化语言。
-PATH
-命令搜索路径，彼此之间冒号分隔。
-PPID
-父进程PID。
-PWD
-当前工作目录，用cd命令设置。
+        变量名
+        含义
+        BASH
+        表示bash命令的完整路径名。
+        ENV
+        在启动新bash shell时执行的环境文件名。
+        HOME
+        主目录。
+        LANG
+        本地化语言。
+        PATH
+        命令搜索路径，彼此之间冒号分隔。
+        PPID
+        父进程PID。
+        PWD
+        当前工作目录，用cd命令设置。
 
     3.  echo命令:
     该命令主要用于将其参数打印到标准输出。其中-e选项使得echo命令可以无限制地使用转义序列控制输出的效果。下面的列表给出常用的转义序列。
-转义序列
-功能
-\c
-不换行打印
-\n
-换行
-\t
-制表符
-\\
-反斜杠
+        转义序列
+        功能
+        \c
+        不换行打印
+        \n
+        换行
+        \t
+        制表符
+        \\
+        反斜杠
     echo还提供了一个常用的-n选项，其功能不输出换行符。
 
     /> echo The username is $LOGNAME
@@ -108,39 +108,39 @@ PWD
 
     4.  printf命令:
     该命令和C语言中的printf函数的功能相同，都用用来格式化输出的。格式包括字符串本身和描述打印效果的字符。定义格式的方法和C语言也是完全一样的，即在%后面跟一个说明符，如%f表示后面是一个浮点数，%d表示一个整数。printf命令也同样支持转义序列符，其常用转义序列如下：
-转义序列
-功能
-\c
-不换行打印
-\n
-换行
-\t
-制表符
-\\
-反斜杠
-\"
-双引号
-    其常用的格式化说明符列表如下：
-说明符
-描述
-%c
-ASCII字符
-%d,%i
-十进制整数
-%f
-浮点格式
-%o
-不带正负号的八进制值
-%s
-字符串
-%u
-不带正负号的十进制值
-%x
-不带正负号的十六进制值，其中使用a-f表示10-15
-%X
-不带正负号的十六进制值，其中使用A-F表示10-15
-%%
-表示%本身
+        转义序列
+        功能
+        \c
+        不换行打印
+        \n
+        换行
+        \t
+        制表符
+        \\
+        反斜杠
+        \"
+        双引号
+            其常用的格式化说明符列表如下：
+        说明符
+        描述
+        %c
+        ASCII字符
+        %d,%i
+        十进制整数
+        %f
+        浮点格式
+        %o
+        不带正负号的八进制值
+        %s
+        字符串
+        %u
+        不带正负号的十进制值
+        %x
+        不带正负号的十六进制值，其中使用a-f表示10-15
+        %X
+        不带正负号的十六进制值，其中使用A-F表示10-15
+        %%
+        表示%本身
     下面是printf的一些常用使用方式：
     /> printf "The number is %.2f.\n" 100   这里.2f表示保留小数点后两位
     The number is 100.00.
@@ -158,36 +158,36 @@ ASCII字符
     f 0xf
 
    5.  变量替换运算符:
-    bash中提供了一组可以同时检验和修改变量的特定修改符。这些修改符提供了一个快捷的方法来检验变量是不是被设置过，并把输出结果输出到一个变量中，见下表：
-修改符
-描述
-用途
-${variable:-word}
-如variable被设置且非空，则返回该值，否则返回word，变量值不变。
-如变量未定义，返回默认值。
-${variable-word}
-如variable未被设置，则返回word，变量值不变，如果设置变量，则返回变量值，即使变量的值为空值。
-如变量未设置，返回默认值。
-${variable:=word}
-如variable被设置且非空，则返回该值，否则设置变量为word，同时返回word。
-如果变量未定义，则设置其为默认值。
-${variable=word}
-如variable未设置，则设置变量为word，同时返回word，如果variable被设置且为空，将返回空值，同时variable不变。否则返回variable值，同时variable不变。
-如果变量未设置，则设置其为默认值。
-${variable:+word}
-如variable被设置且非空，则返回word，否则返回null，变量值不变。
-用于测试变量是否存在。
-${variable+word}
-如variable被设置(即使是空值)，则返回word，否则返回空。
-用于测试变量是否设置。
-${variable:?word}
-如variable被设置且非空，则返回该值，否则显示word，然后退出Shell。如果word为空，打印"parameter null or not set"
-为了捕捉由于变量未定义所导致的错误。
-${variable:offset}
-从variable的offset位置开始取，直到末尾。
- 
-${variable:offset:length}
-从variable的offset位置开始取length个字符。
+            bash中提供了一组可以同时检验和修改变量的特定修改符。这些修改符提供了一个快捷的方法来检验变量是不是被设置过，并把输出结果输出到一个变量中，见下表：
+        修改符
+        描述
+        用途
+        ${variable:-word}
+        如variable被设置且非空，则返回该值，否则返回word，变量值不变。
+        如变量未定义，返回默认值。
+        ${variable-word}
+        如variable未被设置，则返回word，变量值不变，如果设置变量，则返回变量值，即使变量的值为空值。
+        如变量未设置，返回默认值。
+        ${variable:=word}
+        如variable被设置且非空，则返回该值，否则设置变量为word，同时返回word。
+        如果变量未定义，则设置其为默认值。
+        ${variable=word}
+        如variable未设置，则设置变量为word，同时返回word，如果variable被设置且为空，将返回空值，同时variable不变。否则返回variable值，同时variable不变。
+        如果变量未设置，则设置其为默认值。
+        ${variable:+word}
+        如variable被设置且非空，则返回word，否则返回null，变量值不变。
+        用于测试变量是否存在。
+        ${variable+word}
+        如variable被设置(即使是空值)，则返回word，否则返回空。
+        用于测试变量是否设置。
+        ${variable:?word}
+        如variable被设置且非空，则返回该值，否则显示word，然后退出Shell。如果word为空，打印"parameter null or not set"
+        为了捕捉由于变量未定义所导致的错误。
+        ${variable:offset}
+        从variable的offset位置开始取，直到末尾。
+
+        ${variable:offset:length}
+        从variable的offset位置开始取length个字符。
  
 
     #${variable:-word}的示例，其C语言表示形式为：
@@ -332,18 +332,18 @@ ${variable:offset:length}
 
     6.  变量模式匹配运算符:
     Shell中还提供了一组模式匹配运算符，见下表：
-运算符
-替换
-${variable#pattern}
-如果模式匹配变量值的开头，则删除匹配的最短部分，并返回剩下的部分，变量原值不变。
-${variable##pattern}
-如果模式匹配变量值的开头，则删除匹配的最长部分，并返回剩下的部分，变量原值不变。
-${variable%pattern}
-如果模式匹配变量值的结尾，则删除匹配的最短部分，并返回剩下的部分，变量原值不变。
-${variable%%pattern}
-如果模式匹配变量值的结尾，则删除匹配的最长部分，并返回剩下的部分，变量原值不变。
-${#variable}
-返回变量中字母的数量。
+        运算符
+        替换
+        ${variable#pattern}
+        如果模式匹配变量值的开头，则删除匹配的最短部分，并返回剩下的部分，变量原值不变。
+        ${variable##pattern}
+        如果模式匹配变量值的开头，则删除匹配的最长部分，并返回剩下的部分，变量原值不变。
+        ${variable%pattern}
+        如果模式匹配变量值的结尾，则删除匹配的最短部分，并返回剩下的部分，变量原值不变。
+        ${variable%%pattern}
+        如果模式匹配变量值的结尾，则删除匹配的最长部分，并返回剩下的部分，变量原值不变。
+        ${#variable}
+        返回变量中字母的数量。
 
     #${variable#pattern}示例：
     /> pathname="/home/stephen/mycode/test.h"
@@ -380,26 +380,26 @@ ${#variable}
 
     7.  Shell中的内置变量:
     Shell中提供了一些以$开头的内置变量，见下表：
-变量名
-描述
-$?
-表示Shell命令的返回值
-$$
-表示当前Shell的pid
-$-
-表示当前Shell的命令行选项
-$!
-最后一个放入后台作业的PID值
-$0
-表示脚本的名字
-$1--$9
-表示脚本的第一到九个参数
-${10}
-表示脚本的第十个参数
-$#
-表示参数的个数
-$*,$@
-表示所有的参数，有双引号时除外，"$*"表示赋值到一个变量，"$@"表示赋值到多个。
+        变量名
+        描述
+        $?
+        表示Shell命令的返回值
+        $$
+        表示当前Shell的pid
+        $-
+        表示当前Shell的命令行选项
+        $!
+        最后一个放入后台作业的PID值
+        $0
+        表示脚本的名字
+        $1--$9
+        表示脚本的第一到九个参数
+        ${10}
+        表示脚本的第十个参数
+        $#
+        表示参数的个数
+        $*,$@
+        表示所有的参数，有双引号时除外，"$*"表示赋值到一个变量，"$@"表示赋值到多个。
     所有的内置变量都比较容易理解，因此这里仅给出$*和$@的区别用法：
     /> set 'apple pie' pears peaches
     /> for i in $*
@@ -439,24 +439,24 @@ $*,$@
     
     8.  引用:
     Shell中提供三种引用字符，分别是：反斜杠、单引号和双引号，它们可以使Shell中所有元字符失去其特殊功能，而还原其本意。见以下元字符列表：
-元字符
-描述
-;
-命令分隔符
-&
-后台处理Shell命令
-()
-命令组，创建一个子Shell
-{}
-命令组，但是不创建子Shell
-|
-管道
-< >
-输入输出重定向
-$
-变量前缀
-*[]?
-用于文件名扩展的Shell通配符
+        元字符
+        描述
+        ;
+        命令分隔符
+        &
+        后台处理Shell命令
+        ()
+        命令组，创建一个子Shell
+        {}
+        命令组，但是不创建子Shell
+        |
+        管道
+        < >
+        输入输出重定向
+        $
+        变量前缀
+        *[]?
+        用于文件名扩展的Shell通配符
     注：单引号和双引号唯一的区别就是，双引号内可以包含变量和命令替换，而单引号则不会解释这些，见如下示例：
     /> name=Stephen
     /> echo "Hi $name, I'm glad to meet you! "  #name变量被替换
@@ -594,26 +594,26 @@ $
 
     13.  重定向:
     下面的列表为Shell中支持的重新定向操作符。
-操作符
-功能
-<
-重新定向输入
->
-重新定向输出
->>
-追加输出
-2>
-重新定向错误
-&>
-重新定向错误和输出
->&
-重新定向错误和输出
-2>&1
-重新定向错误到标准输出
-1>&2
-重新定向标准输出到错误
->|
-重新定向输出的时候覆盖noclobber选项
+        操作符
+        功能
+        <
+        重新定向输入
+        >
+        重新定向输出
+        >>
+        追加输出
+        2>
+        重新定向错误
+        &>
+        重新定向错误和输出
+        >&
+        重新定向错误和输出
+        2>&1
+        重新定向错误到标准输出
+        1>&2
+        重新定向标准输出到错误
+        >|
+        重新定向输出的时候覆盖noclobber选项
 
     #find命令将搜索结果输出到foundit文件，把错误信息输出到/dev/null
     /> find . -name "*.c" -print > foundit 2> /dev/null
