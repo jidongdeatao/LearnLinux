@@ -10,11 +10,11 @@
         7.grep、egrep与正则表达式用法总结  (2.txt)
         8.sed   (3.txt)  
         9.awk  （4.txt)
-        10.awk编程 (5.txt)
+        11.awk编程 (5.txt)
         12.行的排序命令sort
         13.删除重复行的命令uniq
         14.文件压缩解压命令tar
-        15.大文件拆分命令split
+        15.大文件拆分命令split (6.txt)
 
 有些来自于参考网站
 https://github.com/me115/linuxtools_rst/tree/master/
