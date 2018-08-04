@@ -1,7 +1,21 @@
 学了这么久的Linux，整理下
 
+目录：
+        1.特殊文件: /dev/null和/dev/tty
+        2.简单的命令跟踪
+        3.正则表达式基本语法描述
+        4.使用cut命令截取字段
+        5.wc命令计算行数、字数以及字符数
+        6.提取开头或结尾数行
+        7.grep、egrep与正则表达式用法总结  (2.txt)
+        8.sed   (3.txt)  
+        9.awk  （4.txt)
+        10.
+
 有些来自于参考网站
 https://github.com/me115/linuxtools_rst/tree/master/
+
+
 
 进阶篇：
 https://github.com/me115/linuxtools_rst/tree/master/advance
