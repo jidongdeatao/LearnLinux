@@ -10,11 +10,19 @@
         7.grep、egrep与正则表达式用法总结  (2.txt)
         8.sed   (3.txt)  
         9.awk  （4.txt)
-        11.awk编程 (5.txt)
+        11.awk编程   (5.txt)
         12.行的排序命令sort
         13.删除重复行的命令uniq
         14.文件压缩解压命令tar
-        15.大文件拆分命令split (6.txt)
+        15.大文件拆分命令split   (6.txt)
+        16.文件查找命令find   
+        17.xargs命令   (7.txt)     
+        18.和系统运行状况相关的Shell命令    (8.txt)
+        19.和系统运行进程相关的Shell命令    (9.txt)
+        20.通过管道组合Shell命令获取系统运行数据 
+        21.通过管道组合Shell命令进行系统管理  (10.txt)
+        22.交互式使用Bash Shell      (11.txt)
+        23.Bash Shell编程 (12.txt)
 
 有些来自于参考网站
 https://github.com/me115/linuxtools_rst/tree/master/
