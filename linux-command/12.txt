@@ -1,21 +1,22 @@
 二十三. Bash Shell编程:
 
     1.  读取用户变量:
-    read命令是用于从终端或者文件中读取输入的内建命令，read命令读取整行输入，每行末尾的换行符不被读入。在read命令后面，如果没有指定变量名，读取的数据将被自动赋值给特定的变量REPLY。下面的列表给出了read命令的常用方式：
-命令格式
-描述
-read answer
-从标准输入读取输入并赋值给变量answer。
-read first last
-从标准输入读取输入到第一个空格或者回车，将输入的第一个单词放到变量first中，并将该行其他的输入放在变量last中。
-read
-从标准输入读取一行并赋值给特定变量REPLY。
-read -a arrayname
-把单词清单读入arrayname的数组里。
-read -p prompt
-打印提示，等待输入，并将输入存储在REPLY中。
-read -r line
-允许输入包含反斜杠。
+    read命令是用于从终端或者文件中读取输入的内建命令，read命令读取整行输入，每行末尾的换行符不被读入。
+    在read命令后面，如果没有指定变量名，读取的数据将被自动赋值给特定的变量REPLY。下面的列表给出了read命令的常用方式：
+        命令格式
+        描述
+        read answer
+        从标准输入读取输入并赋值给变量answer。
+        read first last
+        从标准输入读取输入到第一个空格或者回车，将输入的第一个单词放到变量first中，并将该行其他的输入放在变量last中。
+        read
+        从标准输入读取一行并赋值给特定变量REPLY。
+        read -a arrayname
+        把单词清单读入arrayname的数组里。
+        read -p prompt
+        打印提示，等待输入，并将输入存储在REPLY中。
+        read -r line
+        允许输入包含反斜杠。
 
     见下面的示例(绿色高亮部分的文本为控制台手工输入信息)：
     /> read answer        #等待读取输入，直到回车后表示输入完毕，并将输入赋值给变量answer
@@ -92,78 +93,78 @@ read -r line
     /> echo $?
     1
     下面的表格是test命令支持的操作符：
-判断操作符
-判断为真的条件
-字符串判断
- 
-[ stringA=stringB ]
-stringA等于stringB
-[ stringA==stringB ]
-stringA等于stringB
-[ stringA!=stringB ]
-stringA不等于stringB
-[ string ]
-string不为空
-[ -z string ]
-string长度为0
-[ -n string ]
-string长度不为0
-逻辑判断
- 
-[ stringA -a stringB ]
-stringA和stringB都是真
-[ stringA -o stringB ]
-stringA或stringB是真
-[ !string ]
-string不为真
-逻辑判断(复合判断)
- 
-[[ pattern1 && pattern2 ]]
-pattern1和pattern2都是真
-[[ pattern1 || pattern2 ]
-pattern1或pattern2是真
-[[ !pattern ]]
-pattern不为真
-整数判断
- 
-[ intA -eq intB ]
-intA等于intB
-[ intA -ne intB ]
-intA不等于intB
-[ intA -gt intB ]
-intA大于intB
-[ intA -ge intB ]
-intA大于等于intB
-[ intA -lt intB ]
-intA小于intB
-[ intA -le intB ]
-intA小于等于intB
-文件判断中的二进制操作
- 
-[ fileA -nt fileB ]
-fileA比fileB新
-[ fileA -ot fileB ]
-fileA比fileB旧
-[ fileA -ef fileB ]
-fileA和fileB有相同的设备或者inode值
-文件检验
- 
-[ -d $file ] or [[ -d $file ]]
-file为目录且存在时为真
-[ -e $file ] or [[ -e $file ]]
-file为文件且存在时为真
-[ -f $file ] or [[ -f $file ]]
-file为非目录普通文件存在时为真
-[ -s $file ] or [[ -s $file ]]
-file文件存在, 且长度不为0时为真
-[ -L $file ] or [[ -L $file ]]
-file为链接符且存在时为真
-[ -r $file ] or [[ -r $file ]]
-file文件存在且可读时为真
-[ -w $file ] or [[ -w $file ]]
-file文件存在且可写时为真
-[ -x $file ] or [[ -x $file ]]
-file文件存在且可执行时为真
+            判断操作符
+            判断为真的条件
+            字符串判断
+
+            [ stringA=stringB ]
+            stringA等于stringB
+            [ stringA==stringB ]
+            stringA等于stringB
+            [ stringA!=stringB ]
+            stringA不等于stringB
+            [ string ]
+            string不为空
+            [ -z string ]
+            string长度为0
+            [ -n string ]
+            string长度不为0
+            逻辑判断
+
+            [ stringA -a stringB ]
+            stringA和stringB都是真
+            [ stringA -o stringB ]
+            stringA或stringB是真
+            [ !string ]
+            string不为真
+            逻辑判断(复合判断)
+
+            [[ pattern1 && pattern2 ]]
+            pattern1和pattern2都是真
+            [[ pattern1 || pattern2 ]
+            pattern1或pattern2是真
+            [[ !pattern ]]
+            pattern不为真
+            整数判断
+
+            [ intA -eq intB ]
+            intA等于intB
+            [ intA -ne intB ]
+            intA不等于intB
+            [ intA -gt intB ]
+            intA大于intB
+            [ intA -ge intB ]
+            intA大于等于intB
+            [ intA -lt intB ]
+            intA小于intB
+            [ intA -le intB ]
+            intA小于等于intB
+            文件判断中的二进制操作
+
+            [ fileA -nt fileB ]
+            fileA比fileB新
+            [ fileA -ot fileB ]
+            fileA比fileB旧
+            [ fileA -ef fileB ]
+            fileA和fileB有相同的设备或者inode值
+            文件检验
+
+            [ -d $file ] or [[ -d $file ]]
+            file为目录且存在时为真
+            [ -e $file ] or [[ -e $file ]]
+            file为文件且存在时为真
+            [ -f $file ] or [[ -f $file ]]
+            file为非目录普通文件存在时为真
+            [ -s $file ] or [[ -s $file ]]
+            file文件存在, 且长度不为0时为真
+            [ -L $file ] or [[ -L $file ]]
+            file为链接符且存在时为真
+            [ -r $file ] or [[ -r $file ]]
+            file文件存在且可读时为真
+            [ -w $file ] or [[ -w $file ]]
+            file文件存在且可写时为真
+            [ -x $file ] or [[ -x $file ]]
+            file文件存在且可执行时为真
     注：在逻辑判断(复合判读中)，pattern可以包含元字符，在字符串的判断中，pattern2必须被包含在引号中。
 
     let命令支持的操作符和C语言中支持的操作符完全相同，如：
