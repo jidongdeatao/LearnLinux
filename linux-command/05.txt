@@ -1,31 +1,32 @@
 十一.  awk编程:
 
     1.  变量：
-    在awk中变量无须定义即可使用，变量在赋值时即已经完成了定义。变量的类型可以是数字、字符串。根据使用的不同，未初始化变量的值为0或空白字符串" "，这主要取决于变量应用的上下文。下面为变量的赋值负号列表：
-符号
-含义
-等价形式
-=
-a = 5
-a = 5
-+=
-a = a + 5
-a += 5
--=
-a = a - 5
-a -= 5
-*=
-a = a * 5
-a *= 5
-/=
-a = a / 5
-a /= 5
-%=
-a = a % 5
-a %= 5
-^=
-a = a ^ 5
-a ^= 5
+      在awk中变量无须定义即可使用，变量在赋值时即已经完成了定义。变量的类型可以是数字、字符串。根据使用的不同，
+      未初始化变量的值为0或空白字符串" "，这主要取决于变量应用的上下文。下面为变量的赋值负号列表：
+        符号
+        含义
+        等价形式
+        =
+        a = 5
+        a = 5
+        +=
+        a = a + 5
+        a += 5
+        -=
+        a = a - 5
+        a -= 5
+        *=
+        a = a * 5
+        a *= 5
+        /=
+        a = a / 5
+        a /= 5
+        %=
+        a = a % 5
+        a %= 5
+        ^=
+        a = a ^ 5
+        a ^= 5
     /> awk '$1 ~ /Tom/ {Wage = $2 * $3; print Wage}' filename
     该命令将从文件中读取，并查找第一个域字段匹配Tom的记录，再将其第二和第三个字段的乘积赋值给自定义的Wage变量，最后通过print命令将该变量打印输出。
 
@@ -37,48 +38,48 @@ a ^= 5
     这里的month和year都是自定义变量，且分别被赋值为4和2000，在awk的脚本中这些变量将可以被直接使用，他们和脚本中定义的变量在使用上没有任何区别。
 
     除此之外，awk还提供了一组内建变量(变量名全部大写)，见如下列表：
-变量名
-变量内容
-ARGC
-命令行参数的数量。
-ARGIND
-命令行正在处理的当前文件的AGV的索引。
-ARGV
-命令行参数数组。
-CONVFMT
-转换数字格式。
-ENVIRON
-从shell中传递来的包含当前环境变量的数组。
-ERRNO
-当使用close函数或者通过getline函数读取的时候，发生的重新定向错误的描述信息就保存在这个变量中。
-FIELDWIDTHS
-在对记录进行固定域宽的分割时，可以替代FS的分隔符的列表。
-FILENAME
-当前的输入文件名。
-FNR
-当前文件的记录号。
-FS
-输入分隔符，默认是空格。
-IGNORECASE
-在正则表达式和字符串操作中关闭大小写敏感。
-NF
-当前文件域的数量。
-NR
-当前文件记录数。
-OFMT
-数字输出格式。
-OFS
-输出域分隔符。
-ORS
-输出记录分隔符。
-RLENGTH
-通过match函数匹配的字符串的长度。
-RS
-输入记录分隔符。
-RSTART
-通过match函数匹配的字符串的偏移量。
-SUBSEP
-下标分隔符。
+        变量名
+        变量内容
+        ARGC
+        命令行参数的数量。
+        ARGIND
+        命令行正在处理的当前文件的AGV的索引。
+        ARGV
+        命令行参数数组。
+        CONVFMT
+        转换数字格式。
+        ENVIRON
+        从shell中传递来的包含当前环境变量的数组。
+        ERRNO
+        当使用close函数或者通过getline函数读取的时候，发生的重新定向错误的描述信息就保存在这个变量中。
+        FIELDWIDTHS
+        在对记录进行固定域宽的分割时，可以替代FS的分隔符的列表。
+        FILENAME
+        当前的输入文件名。
+        FNR
+        当前文件的记录号。
+        FS
+        输入分隔符，默认是空格。
+        IGNORECASE
+        在正则表达式和字符串操作中关闭大小写敏感。
+        NF
+        当前文件域的数量。
+        NR
+        当前文件记录数。
+        OFMT
+        数字输出格式。
+        OFS
+        输出域分隔符。
+        ORS
+        输出记录分隔符。
+        RLENGTH
+        通过match函数匹配的字符串的长度。
+        RS
+        输入记录分隔符。
+        RSTART
+        通过match函数匹配的字符串的偏移量。
+        SUBSEP
+        下标分隔符。
     /> cat employees2
     Tom Jones:4424:5/12/66:543354
     Mary Adams:5346:11/4/63:28765
@@ -413,70 +414,70 @@ SUBSEP
 
     strftime()
     时间格式化函数，其格式化规则等同于C语言中的strftime函数提供的规则，见以下列表：
-数据格式
-含义
-%a
-Abbreviated weekday name
-%A
-Full weekday name
-%b
-Abbreviated month name
-%B
-Full month name
-%c
-Date and time representation appropriate for locale
-%d
-Day of month as decimal number (01 – 31)
-%H
-Hour in 24-hour format (00 – 23)
-%I
-Hour in 12-hour format (01 – 12)
-%j
-Day of year as decimal number (001 – 366)
-%m
-Month as decimal number (01 – 12)
-%M
-Minute as decimal number (00 – 59)
-%p
-Current locale's A.M./P.M. indicator for 12-hour clock
-%S
-Second as decimal number (00 – 59)
-%U
-Week of year as decimal number, with Sunday as first day of week (00 – 53)
-%w
-Weekday as decimal number (0 – 6; Sunday is 0)
-%W
-Week of year as decimal number, with Monday as first day of week (00 – 53)
-%x
-Date representation for current locale
-%X
-Time representation for current locale
-%y
-Year without century, as decimal number (00 – 99)
-%Y
-Year with century, as decimal number
+        数据格式
+        含义
+        %a
+        Abbreviated weekday name
+        %A
+        Full weekday name
+        %b
+        Abbreviated month name
+        %B
+        Full month name
+        %c
+        Date and time representation appropriate for locale
+        %d
+        Day of month as decimal number (01 – 31)
+        %H
+        Hour in 24-hour format (00 – 23)
+        %I
+        Hour in 12-hour format (01 – 12)
+        %j
+        Day of year as decimal number (001 – 366)
+        %m
+        Month as decimal number (01 – 12)
+        %M
+        Minute as decimal number (00 – 59)
+        %p
+        Current locale's A.M./P.M. indicator for 12-hour clock
+        %S
+        Second as decimal number (00 – 59)
+        %U
+        Week of year as decimal number, with Sunday as first day of week (00 – 53)
+        %w
+        Weekday as decimal number (0 – 6; Sunday is 0)
+        %W
+        Week of year as decimal number, with Monday as first day of week (00 – 53)
+        %x
+        Date representation for current locale
+        %X
+        Time representation for current locale
+        %y
+        Year without century, as decimal number (00 – 99)
+        %Y
+        Year with century, as decimal number
     /> awk 'BEGIN{ print strftime("%D",systime())}'
     11/15/11
     /> awk 'BEGIN{ now = strftime("%T"); print now}'
     23:17:29
 
     内置数学函数：
-名称
-返回值
-atan2(x,y)
-y,x范围内的余切
-cos(x)
-余弦函数
-exp(x)
-求幂
-int(x)
-取整
-log(x)
-自然对数
-sin(x)
-正弦函数
-sqrt(x)
-平方根
+        名称
+        返回值
+        atan2(x,y)
+        y,x范围内的余切
+        cos(x)
+        余弦函数
+        exp(x)
+        求幂
+        int(x)
+        取整
+        log(x)
+        自然对数
+        sin(x)
+        正弦函数
+        sqrt(x)
+        平方根
     /> awk 'BEGIN{print 31/3}'
     10.3333
     /> awk 'BEGIN{print int(31/3)}'
