@@ -1,6 +1,7 @@
 九.  awk实用功能:
 
-    和sed一样，awk也是逐行扫描文件的，从第一行到最后一行，寻找匹配特定模板的行，并在这些行上运行“选择”动作。如果一个模板没有指定动作，这些匹配的行就被显示在屏幕上。如果一个动作没有模板，所有被动作指定的行都被处理。
+    和sed一样，awk也是逐行扫描文件的，从第一行到最后一行，寻找匹配特定模板的行，并在这些行上运行“选择”动作。
+    如果一个模板没有指定动作，这些匹配的行就被显示在屏幕上。如果一个动作没有模板，所有被动作指定的行都被处理。
     
    1.  awk的基本格式：
     /> awk 'pattern' filename
@@ -28,15 +29,17 @@
     Sally Chang
     
     2.  awk的格式输出：
-    awk中同时提供了print和printf两种打印输出的函数，其中print函数的参数可以是变量、数值或者字符串。字符串必须用双引号引用，参数用逗号分隔。如果没有逗号，参数就串联在一起而无法区分。这里，逗号的作用与输出文件的分隔符的作用是一样的，只是后者是空格而已。下面给出基本的转码序列：
-转码
-含义
-\n
-换行
-\r
-回车
-\t
-制表符
+    awk中同时提供了print和printf两种打印输出的函数，其中print函数的参数可以是变量、数值或者字符串。
+    字符串必须用双引号引用，参数用逗号分隔。如果没有逗号，参数就串联在一起而无法区分。
+    这里，逗号的作用与输出文件的分隔符的作用是一样的，只是后者是空格而已。下面给出基本的转码序列：
+        转码
+        含义
+        \n
+        换行
+        \r
+        回车
+        \t
+        制表符
 
     /> date | awk '{print "Month: " $2 "\nYear: ", $6}'
     Month: Oct
@@ -45,43 +48,44 @@
     /> awk '/Sally/{print "\t\tHave a nice day, " $1,$2 "\!"}' employees
                     Have a nice day, Sally Chang!
 
-    在打印数字的时候你也许想控制数字的格式，我们通常用printf来完成这个功能。awk的特殊变量OFMT也可以在使用print函数的时候，控制数字的打印格式。它的默认值是"%.6g"----小数点后面6位将被打印。
+    在打印数字的时候你也许想控制数字的格式，我们通常用printf来完成这个功能。
+    awk的特殊变量OFMT也可以在使用print函数的时候，控制数字的打印格式。它的默认值是"%.6g"----小数点后面6位将被打印。
     /> awk 'BEGIN { OFMT="%.2f"; print 1.2456789, 12E-2}'
     1.25  0.12
 
     现在我们介绍一下功能更为强大的printf函数，其用法和c语言中printf基本相似。下面我们给出awk中printf的格式化说明符列表：
-格式化说明符
-功能
-示例
-结果
-%c
-打印单个ASCII字符。
-printf("The character is %c.\n",x)
-The character is A.
-%d
-打印十进制数。
-printf("The boy is %d years old.\n",y)
-The boy is 15 years old.
-%e
-打印用科学记数法表示的数。
-printf("z is %e.\n",z)
-z is 2.3e+01.
-%f
-打印浮点数。
-printf("z is %f.\n",z)
-z is 2.300000
-%o
-打印八进制数。
-printf("y is %o.\n",y)
-y is 17.
-%s
-打印字符串。
-printf("The name of the culprit is %s.\n",$1);
-The name of the culprit is Bob Smith.
-%x
-打印十六进制数。
-printf("y is %x.\n",y)
-y is f.
+        格式化说明符
+        功能
+        示例
+        结果
+        %c
+        打印单个ASCII字符。
+        printf("The character is %c.\n",x)
+        The character is A.
+        %d
+        打印十进制数。
+        printf("The boy is %d years old.\n",y)
+        The boy is 15 years old.
+        %e
+        打印用科学记数法表示的数。
+        printf("z is %e.\n",z)
+        z is 2.3e+01.
+        %f
+        打印浮点数。
+        printf("z is %f.\n",z)
+        z is 2.300000
+        %o
+        打印八进制数。
+        printf("y is %o.\n",y)
+        y is 17.
+        %s
+        打印字符串。
+        printf("The name of the culprit is %s.\n",$1);
+        The name of the culprit is Bob Smith.
+        %x
+        打印十六进制数。
+        printf("y is %x.\n",y)
+        y is f.
     注：假设列表中的变脸值为x = A, y = 15, z = 2.3, $1 = "Bob Smith"
 
     /> echo "Linux" | awk '{printf "|%-15s|\n", $1}'  # %-15s表示保留15个字符的空间，同时左对齐。
@@ -134,12 +138,14 @@ y is f.
     />  awk -F: '{OFS = "?"};  /Tom/{print $1,$2 }' employees2 #在输出时，域字段间的分隔符已经是?(问号)了
     Tom Jones?4424
 
-    对于awk而言，其模式部分将控制这动作部分的输入，只有符合模式条件的记录才可以交由动作部分基础处理，而模式部分不仅可以写成正则表达式(如上面的例子)，awk还支持条件表达式，如：
+    对于awk而言，其模式部分将控制这动作部分的输入，只有符合模式条件的记录才可以交由动作部分基础处理，
+    而模式部分不仅可以写成正则表达式(如上面的例子)，awk还支持条件表达式，如：
     /> awk '$3 < 4000 {print}' employees
     Sally Chang     1654    7/22/54         650000
     Billy Black       1683    9/23/44         336500
 
-    在花括号内，用分号分隔的语句称为动作。如果模式在动作前面，模式将决定什么时候发出动作。动作可以是一个语句或是一组语句。语句之间用分号分隔，也可以用换行符，如：
+    在花括号内，用分号分隔的语句称为动作。如果模式在动作前面，模式将决定什么时候发出动作。动作可以是一个语句或是一组语句。
+    语句之间用分号分隔，也可以用换行符，如：
     pattern { action statement; action statement; etc. } or
     pattern {
         action statement
@@ -201,33 +207,33 @@ y is f.
 
     1.  比较表达式：
     比较表达式匹配那些只在条件为真时才运行的行。这些表达式利用关系运算符来比较数字和字符串。见如下awk支持的条件表达式列表：
-运算符
-含义
-例子
-<
-小于
-x < y
-<=
-小于等于
-x <= y
-==
-等于
-x == y
-!=
-不等于
-x != y
->=
-大于等于
-x >= y
->
-大于
-x > y
-~
-匹配
-x ~ /y/
-!~
-不匹配
-x !~ /y/
+        运算符
+        含义
+        例子
+        <
+        小于
+        x < y
+        <=
+        小于等于
+        x <= y
+        ==
+        等于
+        x == y
+        !=
+        不等于
+        x != y
+        >=
+        大于等于
+        x >= y
+        >
+        大于
+        x > y
+        ~
+        匹配
+        x ~ /y/
+        !~
+        不匹配
+        x !~ /y/
     /> cat employees
     Tom Jones        4424    5/12/66         543354
     Mary Adams      5346    11/4/63         28765
@@ -244,7 +250,8 @@ x !~ /y/
     Mary Adams      5346    11/4/63         28765
 
     2.  条件表达式：
-    条件表达式使用两个符号--问号和冒号给表达式赋值： conditional expression1 ? expression2 : expressional3，其逻辑等同于C语言中的条件表达式。其对应的if/else语句如下：
+    条件表达式使用两个符号--问号和冒号给表达式赋值： conditional expression1 ? expression2 : expressional3，
+    其逻辑等同于C语言中的条件表达式。其对应的if/else语句如下：
     {
         if (expression1)
             expression2
@@ -269,27 +276,27 @@ x !~ /y/
 
     3.  数学表达式：
     运算可以在模式内进行，其中awk将所有的运算都视为浮点运算，见如下列表：
-运算符
-含义
-例子
-+
-加
-x + y
--
-减
-x - y
-*
-乘
-x * y
-/
-除
-x / y
-%
-取余
-x % y
-^
-乘方
-x ^ y
+        运算符
+        含义
+        例子
+        +
+        加
+        x + y
+        -
+        减
+        x - y
+        *
+        乘
+        x * y
+        /
+        除
+        x / y
+        %
+        取余
+        x % y
+        ^
+        乘方
+        x ^ y
     /> awk '/southern/{print $5 + 10}' testfile  #如果记录包含正则表达式southern，第五个域就加10并打印。
     15.1
 
@@ -298,18 +305,18 @@ x ^ y
 
     4.  逻辑表达式：
     见如下列表：
-运算符
-含义
-例子
-&&
-逻辑与
-a && b
-||
-逻辑或
-a || b
-!
-逻辑非
-!a
+        运算符
+        含义
+        例子
+        &&
+        逻辑与
+        a && b
+        ||
+        逻辑或
+        a || b
+        !
+        逻辑非
+        !a
     /> awk '$8 > 10 && $8 < 17' testfile   #打印出第八个域的值大于10小于17的记录。
     southern        SO      Suan Chin               5.1     .95     4       15
     central            CT      Ann Stephens         5.7     .94     5       13
@@ -327,7 +334,8 @@ a || b
     13
 
     5.  范围模板：
-    范围模板匹配从第一个模板的第一次出现到第二个模板的第一次出现，第一个模板的下一次出现到第一个模板的下一次出现等等。如果第一个模板匹配而第二个模板没有出现，awk就显示到文件末尾的所有行。
+    范围模板匹配从第一个模板的第一次出现到第二个模板的第一次出现，第一个模板的下一次出现到第一个模板的下一次出现等等。
+    如果第一个模板匹配而第二个模板没有出现，awk就显示到文件末尾的所有行。
     /> awk '/^western/,/^eastern/ {print $1}' testfile #打印以western开头到eastern开头的记录的第一个域。
     western    WE
     southwest SW
